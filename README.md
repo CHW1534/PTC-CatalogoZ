@@ -1,4 +1,4 @@
-# PTC Retail - Catálogo de Zapatería y Bolsas
+https://github.com/CHW1534/PTC-CatalogoZ# PTC Retail - Catálogo de Zapatería y Bolsas
 
 Sistema de gestión de productos para tiendas de zapatería y bolsas con soporte multi-sucursal.
 

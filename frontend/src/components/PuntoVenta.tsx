@@ -17,14 +17,13 @@ interface VentaRealizada {
   folio: string;
 }
 
-// Agrupación de productos por nombre+color+marca para selección de tallas
 interface ProductoAgrupado {
   key: string;
   nombre: string;
   color: string;
   marca: string;
   tipo: string;
-  variantes: ProductoSucursal[]; // Diferentes tallas del mismo producto
+  variantes: ProductoSucursal[];
 }
 
 export function PuntoVenta() {
@@ -36,7 +35,6 @@ export function PuntoVenta() {
   const [tallasSeleccionadas, setTallasSeleccionadas] = useState<Record<string, string>>({});
   const ticketRef = useRef<HTMLDivElement>(null);
 
-  // Query productos de la sucursal
   const { data: productosData } = useQuery({
     queryKey: ['productos-venta', selectedSucursal?.id, busqueda],
     queryFn: () =>
@@ -51,7 +49,6 @@ export function PuntoVenta() {
 
   const productos = productosData?.data || [];
 
-  // Agrupar productos por nombre+color+marca para mostrar selector de tallas
   const productosAgrupados = useMemo((): ProductoAgrupado[] => {
     const grupos: Record<string, ProductoAgrupado> = {};
     
@@ -71,7 +68,6 @@ export function PuntoVenta() {
       grupos[key].variantes.push(ps);
     });
 
-    // Ordenar variantes por talla
     Object.values(grupos).forEach((grupo) => {
       grupo.variantes.sort((a, b) => {
         const tallaA = parseFloat(a.producto.talla) || a.producto.talla;
@@ -86,22 +82,18 @@ export function PuntoVenta() {
     return Object.values(grupos);
   }, [productos]);
 
-  // Obtener la variante seleccionada para un grupo
   const getVarianteSeleccionada = (grupo: ProductoAgrupado): ProductoSucursal | null => {
     const tallaSeleccionada = tallasSeleccionadas[grupo.key];
     if (tallaSeleccionada) {
       return grupo.variantes.find(v => v.producto.talla === tallaSeleccionada) || null;
     }
-    // Por defecto, seleccionar la primera con stock
     return grupo.variantes.find(v => (v.inventario?.cantidad ?? 0) > 0) || grupo.variantes[0] || null;
   };
 
-  // Seleccionar talla para un grupo
   const seleccionarTalla = (grupoKey: string, talla: string) => {
     setTallasSeleccionadas(prev => ({ ...prev, [grupoKey]: talla }));
   };
 
-  // Mutation para registrar salida
   const ventaMutation = useMutation({
     mutationFn: async (items: VentaItem[]) => {
       const resultados = [];
@@ -135,7 +127,6 @@ export function PuntoVenta() {
       const existente = prev.find((item) => item.productoSucursal.id === ps.id);
       if (existente) {
         if (existente.cantidad >= stockDisponible) {
-          alert('No hay más stock disponible');
           return prev;
         }
         return prev.map((item) =>
@@ -145,7 +136,6 @@ export function PuntoVenta() {
         );
       }
       if (stockDisponible === 0) {
-        alert('Producto sin stock');
         return prev;
       }
       return [...prev, { productoSucursal: ps, cantidad: 1 }];
@@ -164,7 +154,6 @@ export function PuntoVenta() {
         if (item.productoSucursal.id === productoSucursalId) {
           const stockDisponible = item.productoSucursal.inventario?.cantidad ?? 0;
           if (cantidad > stockDisponible) {
-            alert(`Solo hay ${stockDisponible} unidades disponibles`);
             return item;
           }
           return { ...item, cantidad };
@@ -181,16 +170,10 @@ export function PuntoVenta() {
     );
   };
 
-  const procesarVenta = async () => {
-    if (carrito.length === 0) {
-      alert('El carrito está vacío');
-      return;
-    }
+  const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
 
-    const confirmar = confirm(
-      `¿Confirmar venta por $${calcularTotal().toFixed(2)}?`
-    );
-    if (!confirmar) return;
+  const procesarVenta = async () => {
+    if (carrito.length === 0) return;
 
     try {
       await ventaMutation.mutateAsync(carrito);
@@ -204,8 +187,8 @@ export function PuntoVenta() {
       
       setVentaRealizada(venta);
       setCarrito([]);
-    } catch (error) {
-      alert('Error al procesar la venta. Verifica el stock disponible.');
+    } catch {
+      // Error handled silently
     }
   };
 
@@ -247,21 +230,48 @@ export function PuntoVenta() {
   };
 
   if (!selectedSucursal) {
-    return <div className="no-sucursal">Selecciona una sucursal para vender</div>;
+    return (
+      <div className="pos-empty-state">
+        <div className="pos-empty-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <h3>Selecciona una sucursal</h3>
+        <p>Elige una sucursal en el menu superior para comenzar a vender</p>
+      </div>
+    );
   }
 
-  // Mostrar ticket después de venta
   if (ventaRealizada) {
     return (
-      <div className="venta-completada">
-        <div className="ticket-container" ref={ticketRef}>
+      <div className="pos-venta-completada">
+        <div className="pos-success-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <h2>Venta Completada</h2>
+        <p className="pos-folio">Folio: {ventaRealizada.folio}</p>
+        <div className="pos-ticket-preview" ref={ticketRef}>
           <Ticket venta={ventaRealizada} sucursal={selectedSucursal} />
         </div>
-        <div className="ticket-actions">
-          <button className="btn-primary" onClick={imprimirTicket}>
+        <div className="pos-complete-actions">
+          <button className="btn-primary btn-lg" onClick={imprimirTicket}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
             Imprimir Ticket
           </button>
-          <button className="btn-secondary" onClick={nuevaVenta}>
+          <button className="btn-success btn-lg" onClick={nuevaVenta}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
             Nueva Venta
           </button>
         </div>
@@ -270,19 +280,41 @@ export function PuntoVenta() {
   }
 
   return (
-    <div className="punto-venta">
-      <div className="pv-productos">
-        <div className="pv-busqueda">
-          <input
-            type="text"
-            placeholder="Buscar producto por nombre o marca..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-          />
+    <div className="pos-container">
+      {/* Panel de Productos */}
+      <div className="pos-productos">
+        <div className="pos-search-bar">
+          <div className="pos-search-input">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="text"
+              placeholder="Buscar por nombre, marca o color..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+            {busqueda && (
+              <button className="pos-search-clear" onClick={() => setBusqueda('')}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
-        <div className="pv-grid">
+
+        <div className="pos-productos-grid">
           {productosAgrupados.length === 0 ? (
-            <p className="empty">No hay productos disponibles</p>
+            <div className="pos-no-productos">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <p>No se encontraron productos</p>
+            </div>
           ) : (
             productosAgrupados.map((grupo) => {
               const varianteActual = getVarianteSeleccionada(grupo);
@@ -290,59 +322,68 @@ export function PuntoVenta() {
               const precioActual = varianteActual ? Number(varianteActual.precio) : 0;
               
               return (
-                <div
-                  key={grupo.key}
-                  className={`pv-producto ${stockActual === 0 ? 'sin-stock' : ''}`}
-                >
-                  <div className="pv-producto-nombre">{grupo.nombre}</div>
-                  <div className="pv-producto-info">
-                    {grupo.color} {grupo.marca && `- ${grupo.marca}`}
-                  </div>
-                  <div className="pv-producto-tipo">
-                    <span className={`badge ${grupo.tipo.toLowerCase()}`}>
-                      {grupo.tipo}
+                <div key={grupo.key} className={`pos-card ${stockActual === 0 ? 'sin-stock' : ''}`}>
+                  <div className="pos-card-header">
+                    <span className={`pos-tipo-badge ${grupo.tipo.toLowerCase()}`}>
+                      {grupo.tipo === 'ZAPATO' ? 'Zapato' : 'Bolsa'}
+                    </span>
+                    <span className={`pos-stock-indicator ${stockActual === 0 ? 'out' : stockActual <= 3 ? 'low' : ''}`}>
+                      {stockActual} en stock
                     </span>
                   </div>
                   
-                  {/* Selector de tallas con stock visible */}
-                  <div className="pv-tallas">
-                    <label>Selecciona talla:</label>
-                    <div className="tallas-grid">
+                  <div className="pos-card-body">
+                    <h4 className="pos-card-title">{grupo.nombre}</h4>
+                    <p className="pos-card-subtitle">
+                      {grupo.color}
+                      {grupo.marca && <span> - {grupo.marca}</span>}
+                    </p>
+                  </div>
+
+                  <div className="pos-tallas-section">
+                    <span className="pos-tallas-label">Talla:</span>
+                    <div className="pos-tallas-list">
                       {grupo.variantes.map((variante) => {
                         const stock = variante.inventario?.cantidad ?? 0;
                         const isSelected = varianteActual?.id === variante.id;
                         return (
                           <button
                             key={variante.id}
-                            className={`talla-btn ${isSelected ? 'selected' : ''} ${stock === 0 ? 'agotado' : ''}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              seleccionarTalla(grupo.key, variante.producto.talla);
-                            }}
+                            className={`pos-talla-chip ${isSelected ? 'selected' : ''} ${stock === 0 ? 'disabled' : ''}`}
+                            onClick={() => seleccionarTalla(grupo.key, variante.producto.talla)}
                             disabled={stock === 0}
+                            title={`Stock: ${stock}`}
                           >
-                            <span className="talla-numero">{variante.producto.talla}</span>
-                            <span className={`talla-stock ${stock === 0 ? 'out' : stock <= 2 ? 'low' : ''}`}>
-                              {stock === 0 ? '✕' : stock}
-                            </span>
+                            {variante.producto.talla}
                           </button>
                         );
                       })}
                     </div>
                   </div>
 
-                  <div className="pv-producto-precio">${precioActual.toFixed(2)}</div>
-                  <div className={`pv-producto-stock ${stockActual === 0 ? 'out' : ''}`}>
-                    Stock: {stockActual}
+                  <div className="pos-card-footer">
+                    <div className="pos-precio">
+                      <span className="pos-precio-label">Precio</span>
+                      <span className="pos-precio-value">${precioActual.toFixed(2)}</span>
+                    </div>
+                    <button
+                      className="pos-btn-agregar"
+                      onClick={() => varianteActual && agregarAlCarrito(varianteActual)}
+                      disabled={stockActual === 0}
+                    >
+                      {stockActual === 0 ? (
+                        'Agotado'
+                      ) : (
+                        <>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                          </svg>
+                          Agregar
+                        </>
+                      )}
+                    </button>
                   </div>
-                  
-                  <button
-                    className="btn-agregar"
-                    onClick={() => varianteActual && agregarAlCarrito(varianteActual)}
-                    disabled={stockActual === 0}
-                  >
-                    {stockActual === 0 ? 'Sin Stock' : '+ Agregar'}
-                  </button>
                 </div>
               );
             })
@@ -350,62 +391,112 @@ export function PuntoVenta() {
         </div>
       </div>
 
-      <div className="pv-carrito">
-        <h3>Carrito de Venta</h3>
-        {carrito.length === 0 ? (
-          <p className="carrito-vacio">Selecciona productos para agregar</p>
-        ) : (
-          <>
-            <div className="carrito-items">
+      {/* Panel de Carrito */}
+      <div className="pos-carrito">
+        <div className="pos-carrito-header">
+          <div className="pos-carrito-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span>Carrito</span>
+          </div>
+          {carrito.length > 0 && (
+            <span className="pos-carrito-badge">{totalItems}</span>
+          )}
+        </div>
+
+        <div className="pos-carrito-body">
+          {carrito.length === 0 ? (
+            <div className="pos-carrito-empty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+              <p>El carrito esta vacio</p>
+              <span>Selecciona productos para agregar</span>
+            </div>
+          ) : (
+            <div className="pos-carrito-items">
               {carrito.map((item) => (
-                <div key={item.productoSucursal.id} className="carrito-item">
-                  <div className="carrito-item-info">
-                    <strong>{item.productoSucursal.producto.nombre}</strong>
-                    <span>
-                      {item.productoSucursal.producto.color} - T.{item.productoSucursal.producto.talla}
+                <div key={item.productoSucursal.id} className="pos-carrito-item">
+                  <div className="pos-item-info">
+                    <h5>{item.productoSucursal.producto.nombre}</h5>
+                    <p>
+                      {item.productoSucursal.producto.color} - Talla {item.productoSucursal.producto.talla}
+                    </p>
+                    <span className="pos-item-unit-price">
+                      ${Number(item.productoSucursal.precio).toFixed(2)} c/u
                     </span>
                   </div>
-                  <div className="carrito-item-cantidad">
+                  <div className="pos-item-controls">
+                    <div className="pos-qty-control">
+                      <button
+                        onClick={() => actualizarCantidad(item.productoSucursal.id, item.cantidad - 1)}
+                        disabled={item.cantidad <= 1}
+                      >
+                        -
+                      </button>
+                      <span>{item.cantidad}</span>
+                      <button
+                        onClick={() => actualizarCantidad(item.productoSucursal.id, item.cantidad + 1)}
+                        disabled={item.cantidad >= (item.productoSucursal.inventario?.cantidad ?? 0)}
+                      >
+                        +
+                      </button>
+                    </div>
+                    <span className="pos-item-subtotal">
+                      ${(Number(item.productoSucursal.precio) * item.cantidad).toFixed(2)}
+                    </span>
                     <button
-                      onClick={() =>
-                        actualizarCantidad(item.productoSucursal.id, item.cantidad - 1)
-                      }
+                      className="pos-btn-remove"
+                      onClick={() => quitarDelCarrito(item.productoSucursal.id)}
                     >
-                      -
-                    </button>
-                    <span>{item.cantidad}</span>
-                    <button
-                      onClick={() =>
-                        actualizarCantidad(item.productoSucursal.id, item.cantidad + 1)
-                      }
-                    >
-                      +
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
                     </button>
                   </div>
-                  <div className="carrito-item-precio">
-                    ${(Number(item.productoSucursal.precio) * item.cantidad).toFixed(2)}
-                  </div>
-                  <button
-                    className="btn-remove"
-                    onClick={() => quitarDelCarrito(item.productoSucursal.id)}
-                  >
-                    ✕
-                  </button>
                 </div>
               ))}
             </div>
-            <div className="carrito-total">
-              <span>Total:</span>
-              <strong>${calcularTotal().toFixed(2)}</strong>
+          )}
+        </div>
+
+        {carrito.length > 0 && (
+          <div className="pos-carrito-footer">
+            <div className="pos-total-row">
+              <span>Subtotal ({totalItems} items)</span>
+              <span>${calcularTotal().toFixed(2)}</span>
+            </div>
+            <div className="pos-total-row total">
+              <span>Total a Pagar</span>
+              <span>${calcularTotal().toFixed(2)}</span>
             </div>
             <button
-              className="btn-vender"
+              className="pos-btn-checkout"
               onClick={procesarVenta}
               disabled={ventaMutation.isPending}
             >
-              {ventaMutation.isPending ? 'Procesando...' : 'Procesar Venta'}
+              {ventaMutation.isPending ? (
+                <>
+                  <span className="pos-spinner"></span>
+                  Procesando...
+                </>
+              ) : (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                  </svg>
+                  Cobrar ${calcularTotal().toFixed(2)}
+                </>
+              )}
             </button>
-          </>
+          </div>
         )}
       </div>
     </div>

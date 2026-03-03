@@ -1,27 +1,23 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { transaccionesService, sucursalesService } from '../services';
+import { transaccionesService } from '../services';
+import { useSucursal } from '../context';
 import { TipoTransaccion } from '../types';
-import type { Transaccion, Sucursal } from '../types';
+import type { Transaccion } from '../types';
 
 export function TransaccionesTable() {
+  const { selectedSucursal } = useSucursal();
   const [filtroTipo, setFiltroTipo] = useState<string>('');
-  const [filtroSucursal, setFiltroSucursal] = useState<string>('');
 
-  // Query de sucursales
-  const { data: sucursales = [] } = useQuery({
-    queryKey: ['sucursales'],
-    queryFn: sucursalesService.getAll,
-  });
-
-  // Query de transacciones
+  // Query de transacciones - filtrado por sucursal seleccionada
   const { data: transacciones = [], isLoading } = useQuery({
-    queryKey: ['transacciones', filtroTipo, filtroSucursal],
+    queryKey: ['transacciones', filtroTipo, selectedSucursal?.id],
     queryFn: () => transaccionesService.getAll({
       tipo: filtroTipo as typeof TipoTransaccion.ENTRADA | typeof TipoTransaccion.SALIDA | undefined,
-      sucursalId: filtroSucursal || undefined,
+      sucursalId: selectedSucursal?.id,
     }),
-    staleTime: 0, // Siempre refrescar al navegar
+    enabled: !!selectedSucursal,
+    staleTime: 0,
     refetchOnMount: 'always',
   });
 
@@ -57,11 +53,19 @@ export function TransaccionesTable() {
     }).format(date);
   };
 
+  if (!selectedSucursal) {
+    return (
+      <div className="transacciones-container">
+        <div className="empty-state">Selecciona una sucursal para ver las transacciones</div>
+      </div>
+    );
+  }
+
   return (
     <div className="transacciones-container">
       {/* Título y descripción */}
       <div className="transacciones-header">
-        <h2>Transacciones</h2>
+        <h2>Transacciones - {selectedSucursal.nombre}</h2>
         <p className="transacciones-subtitle">Historial de entradas y salidas de inventario</p>
       </div>
 
@@ -107,17 +111,6 @@ export function TransaccionesTable() {
           <option value="">Todos los tipos</option>
           <option value={TipoTransaccion.ENTRADA}>Entradas</option>
           <option value={TipoTransaccion.SALIDA}>Salidas</option>
-        </select>
-
-        <select
-          value={filtroSucursal}
-          onChange={(e) => setFiltroSucursal(e.target.value)}
-          className="filter-select"
-        >
-          <option value="">Todas las sucursales</option>
-          {sucursales.map((s: Sucursal) => (
-            <option key={s.id} value={s.id}>{s.nombre}</option>
-          ))}
         </select>
       </div>
 

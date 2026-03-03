@@ -29,6 +29,8 @@ export function AsignarProductoForm({ onClose, onSuccess }: Props) {
       productosService.asignarASucursal(selectedSucursal!.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['productos'] });
+      queryClient.invalidateQueries({ queryKey: ['transacciones'] });
+      queryClient.invalidateQueries({ queryKey: ['inventario'] });
       onSuccess?.();
       onClose();
     },

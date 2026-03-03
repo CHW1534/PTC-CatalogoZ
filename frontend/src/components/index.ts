@@ -6,3 +6,5 @@ export { SucursalForm } from './SucursalForm';
 export { PuntoVenta } from './PuntoVenta';
 export { Ticket } from './Ticket';
 export { TransaccionesTable } from './TransaccionesTable';
+export { InventarioPage } from './InventarioPage';
+export { SucursalesPage } from './SucursalesPage';

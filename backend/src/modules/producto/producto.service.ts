@@ -12,6 +12,8 @@ import {
   CreateProductoRangoDto,
 } from './dto';
 import { Inventario } from '../inventario/entities/inventario.entity';
+import { Transaccion } from '../transaccion/entities/transaccion.entity';
+import { TipoTransaccion } from '../../common/enums';
 
 @Injectable()
 export class ProductoService {
@@ -22,6 +24,8 @@ export class ProductoService {
     private readonly productoSucursalRepository: Repository<ProductoSucursal>,
     @InjectRepository(Inventario)
     private readonly inventarioRepository: Repository<Inventario>,
+    @InjectRepository(Transaccion)
+    private readonly transaccionRepository: Repository<Transaccion>,
   ) {}
 
   // === PRODUCTOS BASE ===
@@ -78,12 +82,27 @@ export class ProductoService {
 
     const saved = await this.productoSucursalRepository.save(productoSucursal);
 
+    const cantidadInicial = dto.cantidadInicial ?? 0;
+
     // Crear inventario inicial
     const inventario = this.inventarioRepository.create({
       productoSucursalId: saved.id,
-      cantidad: dto.cantidadInicial ?? 0,
+      cantidad: cantidadInicial,
     });
     await this.inventarioRepository.save(inventario);
+
+    // Registrar transacción de ENTRADA si hay stock inicial
+    if (cantidadInicial > 0) {
+      const transaccion = this.transaccionRepository.create({
+        productoSucursalId: saved.id,
+        tipoTransaccion: TipoTransaccion.ENTRADA,
+        cantidad: cantidadInicial,
+        precioUnitario: dto.precio,
+        total: cantidadInicial * dto.precio,
+        observaciones: 'Stock inicial al asignar producto',
+      });
+      await this.transaccionRepository.save(transaccion);
+    }
 
     return saved;
   }

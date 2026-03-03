@@ -9,6 +9,8 @@ import {
   SucursalForm,
   PuntoVenta,
   TransaccionesTable,
+  InventarioPage,
+  SucursalesPage,
 } from './components';
 import './App.css';
 
@@ -21,68 +23,38 @@ const queryClient = new QueryClient({
   },
 });
 
-type Vista = 'dashboard' | 'ventas' | 'transacciones';
+type Vista = 'productos' | 'sucursales' | 'inventario' | 'transacciones' | 'ventas';
 
 function MainApp() {
-  const [vista, setVista] = useState<Vista>('dashboard');
+  const [vista, setVista] = useState<Vista>('productos');
   const [showProductoForm, setShowProductoForm] = useState(false);
   const [showAsignarForm, setShowAsignarForm] = useState(false);
   const [showSucursalForm, setShowSucursalForm] = useState(false);
 
   return (
     <div className="app">
-      <Header />
-
-      {/* Navegación */}
-      <nav className="nav-tabs">
-        <button
-          className={`nav-tab ${vista === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setVista('dashboard')}
-        >
-          Inventario
-        </button>
-        <button
-          className={`nav-tab ${vista === 'ventas' ? 'active' : ''}`}
-          onClick={() => setVista('ventas')}
-        >
-          Punto de Venta
-        </button>
-        <button
-          className={`nav-tab ${vista === 'transacciones' ? 'active' : ''}`}
-          onClick={() => setVista('transacciones')}
-        >
-          Transacciones
-        </button>
-      </nav>
+      <Header vista={vista} onVistaChange={(v) => setVista(v as Vista)} />
 
       <main className="main-content">
-        {vista === 'dashboard' ? (
+        {vista === 'productos' ? (
           <>
             <div className="dashboard-header">
-              <h2>Dashboard de Productos</h2>
+              <h2>Catalogo de Productos</h2>
               <div className="action-buttons">
                 <button
-                  className="btn-secondary"
-                  onClick={() => setShowSucursalForm(true)}
-                >
-                  + Nueva Sucursal
-                </button>
-                <button
-                  className="btn-secondary"
+                  className="btn-primary"
                   onClick={() => setShowProductoForm(true)}
                 >
                   + Nuevo Producto
-                </button>
-                <button
-                  className="btn-primary"
-                  onClick={() => setShowAsignarForm(true)}
-                >
-                  + Asignar a Sucursal
                 </button>
               </div>
             </div>
             <ProductosTable />
           </>
+        ) : vista === 'sucursales' ? (
+          <SucursalesPage />
+        ) : vista === 'inventario' ? (
+          <InventarioPage />
         ) : vista === 'ventas' ? (
           <>
             <div className="dashboard-header">
@@ -91,7 +63,12 @@ function MainApp() {
             <PuntoVenta />
           </>
         ) : (
-          <TransaccionesTable />
+          <>
+            <div className="dashboard-header">
+              <h2>Historial de Transacciones</h2>
+            </div>
+            <TransaccionesTable />
+          </>
         )}
       </main>
 

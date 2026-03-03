@@ -1,6 +1,8 @@
-https://github.com/CHW1534/PTC-CatalogoZ# PTC Retail - Catálogo de Zapatería y Bolsas
+# PTC Retail - Catalogo de Zapateria y Bolsas
 
-Sistema de gestión de productos para tiendas de zapatería y bolsas con soporte multi-sucursal.
+Sistema de gestion de productos para tiendas de zapateria y bolsas con soporte multi-sucursal.
+
+**Repositorio:** https://github.com/CHW1534/PTC-CatalogoZ
 
 ## Stack Tecnológico
 
@@ -89,13 +91,32 @@ npm run build
 npm run preview
 ```
 
-## Uso de la Aplicación
+## Uso de la Aplicacion
 
-1. **Crear una sucursal**: Click en "+ Nueva Sucursal" en el dashboard
-2. **Crear un producto**: Click en "+ Nuevo Producto" para crear un producto base
-3. **Asignar producto a sucursal**: Click en "+ Asignar a Sucursal" para agregar el producto al catálogo de la sucursal actual con su precio
-4. **Filtrar productos**: Usar los filtros por tipo, color, talla o el buscador
-5. **Ver disponibilidad**: Click en el icono de tienda para ver el stock en otras sucursales
+### Navegacion Principal
+La aplicacion cuenta con un header de navegacion con las siguientes secciones:
+- **Punto de Venta**: Vista principal del catalogo y ventas
+- **Inventario**: Gestion de entradas y salidas de stock
+- **Sucursales**: Administracion de puntos de venta
+
+### Punto de Venta
+1. **Crear un producto**: Click en "+ Nuevo Producto" para crear un producto base
+2. **Asignar producto a sucursal**: Click en "+ Asignar a Sucursal" para agregar el producto al catalogo de la sucursal actual con su precio
+3. **Filtrar productos**: Usar los filtros por tipo, color, talla o el buscador
+4. **Ver disponibilidad**: Click en el icono de tienda para ver el stock en otras sucursales
+5. **Realizar venta**: Agregar productos al carrito y procesar venta con generacion de ticket
+
+### Inventario
+1. **Ver stock**: Consultar el inventario actual de todos los productos en la sucursal
+2. **Registrar entrada**: Agregar stock a productos existentes
+3. **Registrar salida**: Reducir stock (ajustes, mermas, etc.)
+4. **Historial**: Ver todas las transacciones de inventario
+
+### Sucursales
+1. **Crear sucursal**: Click en "+ Nueva Sucursal"
+2. **Editar sucursal**: Modificar nombre, direccion o telefono
+3. **Activar/Desactivar**: Controlar estado de cada sucursal
+4. **Estadisticas**: Ver resumen de sucursales activas e inactivas
 
 ## Estructura del Proyecto
 
@@ -115,7 +136,12 @@ PTCRETAIL/
 ├── frontend/                 # React + Vite
 │   └── src/
 │       ├── components/      # Componentes UI
-│       ├── context/         # Estado global
+│       │   ├── Header.tsx         # Navegacion principal
+│       │   ├── PuntoVenta.tsx     # Catalogo y ventas
+│       │   ├── InventarioPage.tsx # Gestion de stock
+│       │   ├── SucursalesPage.tsx # Admin sucursales
+│       │   └── ...                # Otros componentes
+│       ├── context/         # Estado global (sucursal activa)
 │       ├── services/        # Llamadas API
 │       └── types/           # Interfaces TypeScript
 │
@@ -143,10 +169,14 @@ PTCRETAIL/
 - [x] Buscador por nombre/marca
 - [x] Multi-sucursal con precios independientes
 - [x] Consulta de disponibilidad cross-sucursal
-- [x] Gestión de inventario
+- [x] Gestion de inventario con pagina dedicada
 - [x] Registro de transacciones (entradas/salidas)
 - [x] Soft delete para productos
-- [x] Paginación
+- [x] Paginacion
+- [x] Punto de venta con carrito de compras
+- [x] Generacion de tickets de venta
+- [x] Panel de administracion de sucursales
+- [x] Dashboard con estadisticas por seccion
 
 ### Características Técnicas
 - Validación con class-validator

@@ -1,0 +1,178 @@
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { transaccionesService, sucursalesService } from '../services';
+import { TipoTransaccion } from '../types';
+import type { Transaccion, Sucursal } from '../types';
+
+export function TransaccionesTable() {
+  const [filtroTipo, setFiltroTipo] = useState<string>('');
+  const [filtroSucursal, setFiltroSucursal] = useState<string>('');
+
+  // Query de sucursales
+  const { data: sucursales = [] } = useQuery({
+    queryKey: ['sucursales'],
+    queryFn: sucursalesService.getAll,
+  });
+
+  // Query de transacciones
+  const { data: transacciones = [], isLoading } = useQuery({
+    queryKey: ['transacciones', filtroTipo, filtroSucursal],
+    queryFn: () => transaccionesService.getAll({
+      tipo: filtroTipo as typeof TipoTransaccion.ENTRADA | typeof TipoTransaccion.SALIDA | undefined,
+      sucursalId: filtroSucursal || undefined,
+    }),
+    staleTime: 0, // Siempre refrescar al navegar
+    refetchOnMount: 'always',
+  });
+
+  // Calcular estadísticas
+  const stats = useMemo(() => {
+    const entradas = transacciones.filter(t => t.tipoTransaccion === TipoTransaccion.ENTRADA);
+    const salidas = transacciones.filter(t => t.tipoTransaccion === TipoTransaccion.SALIDA);
+    const valorSalidas = salidas.reduce((sum, t) => sum + Number(t.total), 0);
+    
+    return {
+      total: transacciones.length,
+      entradas: entradas.length,
+      salidas: salidas.length,
+      valorSalidas,
+    };
+  }, [transacciones]);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+    }).format(value);
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return new Intl.DateTimeFormat('es-MX', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  };
+
+  return (
+    <div className="transacciones-container">
+      {/* Título y descripción */}
+      <div className="transacciones-header">
+        <h2>Transacciones</h2>
+        <p className="transacciones-subtitle">Historial de entradas y salidas de inventario</p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="stats-container stats-4">
+        <div className="stat-card">
+          <div className="stat-icon stat-movements"></div>
+          <div className="stat-info">
+            <div className="stat-value">{stats.total}</div>
+            <div className="stat-label">Total Movimientos</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon stat-entries"></div>
+          <div className="stat-info">
+            <div className="stat-value stat-green">{stats.entradas}</div>
+            <div className="stat-label">Entradas</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon stat-exits"></div>
+          <div className="stat-info">
+            <div className="stat-value stat-red">{stats.salidas}</div>
+            <div className="stat-label">Salidas</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon stat-value-icon"></div>
+          <div className="stat-info">
+            <div className="stat-value stat-orange">{formatCurrency(stats.valorSalidas)}</div>
+            <div className="stat-label">Valor Total Salidas</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filtros */}
+      <div className="transacciones-filters">
+        <select
+          value={filtroTipo}
+          onChange={(e) => setFiltroTipo(e.target.value)}
+          className="filter-select"
+        >
+          <option value="">Todos los tipos</option>
+          <option value={TipoTransaccion.ENTRADA}>Entradas</option>
+          <option value={TipoTransaccion.SALIDA}>Salidas</option>
+        </select>
+
+        <select
+          value={filtroSucursal}
+          onChange={(e) => setFiltroSucursal(e.target.value)}
+          className="filter-select"
+        >
+          <option value="">Todas las sucursales</option>
+          {sucursales.map((s: Sucursal) => (
+            <option key={s.id} value={s.id}>{s.nombre}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Tabla */}
+      <div className="transacciones-table-container">
+        <div className="table-header-meta">
+          <h3>Historial ({transacciones.length} registros)</h3>
+        </div>
+
+        {isLoading ? (
+          <div className="loading">Cargando transacciones...</div>
+        ) : transacciones.length === 0 ? (
+          <div className="empty-state">No hay transacciones registradas</div>
+        ) : (
+          <table className="transacciones-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Sucursal</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Precio Unit.</th>
+                <th>Total</th>
+                <th>Observaciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transacciones.map((t: Transaccion) => (
+                <tr key={t.id}>
+                  <td className="date-cell">{formatDate(t.createdAt)}</td>
+                  <td className="product-cell">
+                    {t.productoSucursal?.producto?.nombre || '—'}
+                    {t.productoSucursal?.producto?.talla && (
+                      <span className="talla-badge">T{t.productoSucursal.producto.talla}</span>
+                    )}
+                  </td>
+                  <td>{t.productoSucursal?.sucursal?.nombre || '—'}</td>
+                  <td>
+                    <span className={`tipo-badge ${t.tipoTransaccion === TipoTransaccion.ENTRADA ? 'entrada' : 'salida'}`}>
+                      {t.tipoTransaccion === TipoTransaccion.ENTRADA ? 'ENTRADA' : 'SALIDA'}
+                    </span>
+                  </td>
+                  <td className="cantidad-cell">{t.cantidad}</td>
+                  <td className="precio-cell">{formatCurrency(Number(t.precioUnitario))}</td>
+                  <td className={`total-cell ${t.tipoTransaccion === TipoTransaccion.SALIDA ? 'salida' : 'entrada'}`}>
+                    {formatCurrency(Number(t.total))}
+                  </td>
+                  <td className="obs-cell">{t.observaciones || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}

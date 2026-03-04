@@ -7,6 +7,11 @@ export const sucursalesService = {
     return data;
   },
 
+  getAllIncludingInactive: async (): Promise<Sucursal[]> => {
+    const { data } = await api.get<Sucursal[]>('/sucursales/admin/all');
+    return data;
+  },
+
   getById: async (id: string): Promise<Sucursal> => {
     const { data } = await api.get<Sucursal>(`/sucursales/${id}`);
     return data;

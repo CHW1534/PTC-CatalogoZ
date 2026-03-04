@@ -4,6 +4,15 @@ import { useSucursal } from '../context';
 import { productosService, transaccionesService } from '../services';
 import type { ProductoSucursal } from '../types';
 import { Ticket } from './Ticket';
+import StoreIcon from '@mui/icons-material/Store';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import PrintIcon from '@mui/icons-material/Print';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import PaymentIcon from '@mui/icons-material/Payment';
 
 interface VentaItem {
   productoSucursal: ProductoSucursal;
@@ -233,10 +242,7 @@ export function PuntoVenta() {
     return (
       <div className="pos-empty-state">
         <div className="pos-empty-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
+          <StoreIcon sx={{ fontSize: 48 }} />
         </div>
         <h3>Selecciona una sucursal</h3>
         <p>Elige una sucursal en el menu superior para comenzar a vender</p>
@@ -248,10 +254,7 @@ export function PuntoVenta() {
     return (
       <div className="pos-venta-completada">
         <div className="pos-success-icon">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
+          <CheckCircleOutlineIcon sx={{ fontSize: 64 }} />
         </div>
         <h2>Venta Completada</h2>
         <p className="pos-folio">Folio: {ventaRealizada.folio}</p>
@@ -260,18 +263,11 @@ export function PuntoVenta() {
         </div>
         <div className="pos-complete-actions">
           <button className="btn-primary btn-lg" onClick={imprimirTicket}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="6 9 6 2 18 2 18 9"></polyline>
-              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-              <rect x="6" y="14" width="12" height="8"></rect>
-            </svg>
+            <PrintIcon sx={{ fontSize: 20 }} />
             Imprimir Ticket
           </button>
           <button className="btn-success btn-lg" onClick={nuevaVenta}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
+            <AddIcon sx={{ fontSize: 20 }} />
             Nueva Venta
           </button>
         </div>
@@ -285,10 +281,7 @@ export function PuntoVenta() {
       <div className="pos-productos">
         <div className="pos-search-bar">
           <div className="pos-search-input">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
+            <SearchIcon sx={{ fontSize: 20 }} />
             <input
               type="text"
               placeholder="Buscar por nombre, marca o color..."
@@ -297,10 +290,7 @@ export function PuntoVenta() {
             />
             {busqueda && (
               <button className="pos-search-clear" onClick={() => setBusqueda('')}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <CloseIcon sx={{ fontSize: 18 }} />
               </button>
             )}
           </div>
@@ -309,10 +299,7 @@ export function PuntoVenta() {
         <div className="pos-productos-grid">
           {productosAgrupados.length === 0 ? (
             <div className="pos-no-productos">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
+              <SearchIcon sx={{ fontSize: 48 }} />
               <p>No se encontraron productos</p>
             </div>
           ) : (
@@ -375,10 +362,7 @@ export function PuntoVenta() {
                         'Agotado'
                       ) : (
                         <>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                          </svg>
+                          <AddIcon sx={{ fontSize: 18 }} />
                           Agregar
                         </>
                       )}
@@ -395,11 +379,7 @@ export function PuntoVenta() {
       <div className="pos-carrito">
         <div className="pos-carrito-header">
           <div className="pos-carrito-title">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="9" cy="21" r="1"></circle>
-              <circle cx="20" cy="21" r="1"></circle>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-            </svg>
+            <ShoppingCartIcon sx={{ fontSize: 22 }} />
             <span>Carrito</span>
           </div>
           {carrito.length > 0 && (
@@ -410,11 +390,7 @@ export function PuntoVenta() {
         <div className="pos-carrito-body">
           {carrito.length === 0 ? (
             <div className="pos-carrito-empty">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <circle cx="9" cy="21" r="1"></circle>
-                <circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-              </svg>
+              <ShoppingCartIcon sx={{ fontSize: 48 }} />
               <p>El carrito esta vacio</p>
               <span>Selecciona productos para agregar</span>
             </div>
@@ -454,10 +430,7 @@ export function PuntoVenta() {
                       className="pos-btn-remove"
                       onClick={() => quitarDelCarrito(item.productoSucursal.id)}
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                      </svg>
+                      <DeleteOutlineIcon sx={{ fontSize: 18 }} />
                     </button>
                   </div>
                 </div>
@@ -488,10 +461,7 @@ export function PuntoVenta() {
                 </>
               ) : (
                 <>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                    <line x1="1" y1="10" x2="23" y2="10"></line>
-                  </svg>
+                  <PaymentIcon sx={{ fontSize: 22 }} />
                   Cobrar ${calcularTotal().toFixed(2)}
                 </>
               )}

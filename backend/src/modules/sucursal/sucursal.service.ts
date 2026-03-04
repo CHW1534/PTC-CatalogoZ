@@ -23,6 +23,12 @@ export class SucursalService {
     });
   }
 
+  async findAllIncludingInactive(): Promise<Sucursal[]> {
+    return this.sucursalRepository.find({
+      order: { activa: 'DESC', nombre: 'ASC' },
+    });
+  }
+
   async findOne(id: string): Promise<Sucursal> {
     const sucursal = await this.sucursalRepository.findOne({ where: { id } });
     if (!sucursal) {

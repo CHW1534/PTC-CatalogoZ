@@ -25,6 +25,11 @@ export class SucursalController {
     return this.sucursalService.findAll();
   }
 
+  @Get('admin/all')
+  findAllIncludingInactive() {
+    return this.sucursalService.findAllIncludingInactive();
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.sucursalService.findOne(id);

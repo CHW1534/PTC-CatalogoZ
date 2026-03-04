@@ -231,3 +231,78 @@ PTCRETAIL/
 ## Licencia
 
 MIT
+
+# Guía Rápida de Uso y Deploy (Docker)
+
+## 1. Requisitos
+- Docker y Docker Compose instalados
+- (Opcional) Node.js y npm para desarrollo local
+
+## 2. Levantar la app desde cero (producción)
+
+### 2.1. Clona el repositorio
+```bash
+git clone https://github.com/CHW1534/PTC-CatalogoZ.git
+cd PTC-CatalogoZ
+```
+
+### 2.2. Configura los archivos de entorno (opcional)
+- Por defecto funciona sin cambios, pero puedes copiar y editar:
+  - `.env.example` → `.env`
+  - `backend/.env.example` → `backend/.env`
+  - `frontend/.env.example` → `frontend/.env`
+
+### 2.3. Levanta todos los servicios
+```bash
+docker-compose up --build -d
+```
+- Esto crea y levanta:
+  - PostgreSQL (puerto 5432)
+  - Backend NestJS (puerto 3001, expuesto como 3000 dentro del contenedor)
+  - Frontend React (Nginx, puerto 80)
+
+### 2.4. Accede a la app
+- Navega a: [http://localhost](http://localhost)
+- El backend expone la API en: [http://localhost:3001/api](http://localhost:3001/api)
+
+## 3. Uso de la App
+
+### 3.1. Navegación
+- No requiere login (por defecto)
+- Usa el menú superior para navegar entre:
+  - Catálogo de productos
+  - Sucursales
+  - Inventario
+  - Punto de venta
+  - Historial de transacciones
+
+### 3.2. Funcionalidades principales
+- **Catálogo de productos:** Alta, edición y consulta de productos. Permite multi-talla.
+- **Sucursales:** Alta y edición de sucursales.
+- **Inventario:** Consulta y asignación de productos a sucursales.
+- **Punto de venta:** Venta rápida, selección de talla, carrito, impresión de ticket.
+- **Transacciones:** Historial de movimientos (ventas, asignaciones, etc).
+
+### 3.3. Responsive
+- La app es responsive: funciona en PC, tablet y móvil.
+
+## 4. Comandos útiles
+- Parar todos los servicios:
+  ```bash
+  docker-compose down -v
+  ```
+- Ver logs:
+  ```bash
+  docker-compose logs -f
+  ```
+- Reconstruir frontend:
+  ```bash
+  docker-compose build --no-cache frontend; docker-compose up -d frontend
+  ```
+
+## 5. Notas
+- El seed de datos se ejecuta automáticamente la primera vez (`RUN_SEED=true`)
+- Cambia las variables de entorno si necesitas personalizar usuarios, contraseñas o puertos.
+- Los archivos temporales `tmpclaude-*` no deben subirse a git.
+
+---

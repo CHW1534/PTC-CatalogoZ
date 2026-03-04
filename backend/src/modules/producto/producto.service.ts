@@ -10,6 +10,7 @@ import {
   UpdateProductoSucursalDto,
   FilterProductoDto,
   CreateProductoRangoDto,
+  CreateProductoMultiTallaDto,
 } from './dto';
 import { Inventario } from '../inventario/entities/inventario.entity';
 import { Transaccion } from '../transaccion/entities/transaccion.entity';
@@ -290,6 +291,31 @@ export class ProductoService {
         tipo: dto.tipo,
         descripcion: dto.descripcion,
         grupoId, // Asignar el grupoId compartido
+      });
+      const saved = await this.productoRepository.save(producto);
+      productos.push(saved);
+    }
+
+    return productos;
+  }
+
+  // === CREAR PRODUCTOS CON MÚLTIPLES TALLAS SELECCIONADAS ===
+
+  async createConMultiTallas(dto: CreateProductoMultiTallaDto): Promise<Producto[]> {
+    const productos: Producto[] = [];
+    const grupoId = uuidv4(); // Mismo grupoId para todas las tallas
+
+    for (const tallaData of dto.tallas) {
+      const producto = this.productoRepository.create({
+        nombre: dto.nombre,
+        marca: dto.marca,
+        modelo: dto.modelo,
+        color: dto.color,
+        talla: tallaData.talla,
+        tipo: dto.tipo,
+        descripcion: dto.descripcion,
+        imagenUrl: dto.imagenUrl,
+        grupoId,
       });
       const saved = await this.productoRepository.save(producto);
       productos.push(saved);

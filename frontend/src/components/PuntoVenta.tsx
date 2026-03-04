@@ -42,18 +42,23 @@ export function PuntoVenta() {
   const [ventaRealizada, setVentaRealizada] = useState<VentaRealizada | null>(null);
   const [busqueda, setBusqueda] = useState('');
   const [tallasSeleccionadas, setTallasSeleccionadas] = useState<Record<string, string>>({});
+  const [carritoVisible, setCarritoVisible] = useState(false);
   const ticketRef = useRef<HTMLDivElement>(null);
 
-  const { data: productosData } = useQuery({
-    queryKey: ['productos-venta', selectedSucursal?.id, busqueda],
+  // Usar trim para comparación consistente en queryKey
+  const searchTerm = busqueda.trim();
+
+  const { data: productosData, isLoading } = useQuery({
+    queryKey: ['productos-venta', selectedSucursal?.id, searchTerm],
     queryFn: () =>
       selectedSucursal
         ? productosService.getBySucursal(selectedSucursal.id, {
-            search: busqueda || undefined,
-            limit: 50,
+            search: searchTerm || undefined,
+            limit: 100,
           })
-        : Promise.resolve({ data: [], total: 0, page: 1, limit: 50 }),
+        : Promise.resolve({ data: [], total: 0, page: 1, limit: 100 }),
     enabled: !!selectedSucursal,
+    staleTime: 30000, // 30 segundos
   });
 
   const productos = productosData?.data || [];
@@ -297,7 +302,12 @@ export function PuntoVenta() {
         </div>
 
         <div className="pos-productos-grid">
-          {productosAgrupados.length === 0 ? (
+          {isLoading ? (
+            <div className="pos-loading">
+              <div className="pos-spinner"></div>
+              <p>Cargando productos...</p>
+            </div>
+          ) : productosAgrupados.length === 0 ? (
             <div className="pos-no-productos">
               <SearchIcon sx={{ fontSize: 48 }} />
               <p>No se encontraron productos</p>
@@ -376,7 +386,7 @@ export function PuntoVenta() {
       </div>
 
       {/* Panel de Carrito */}
-      <div className="pos-carrito">
+      <div className={`pos-carrito${carritoVisible ? ' pos-carrito-visible' : ''}`}>
         <div className="pos-carrito-header">
           <div className="pos-carrito-title">
             <ShoppingCartIcon sx={{ fontSize: 22 }} />
@@ -385,6 +395,13 @@ export function PuntoVenta() {
           {carrito.length > 0 && (
             <span className="pos-carrito-badge">{totalItems}</span>
           )}
+          <button
+            className="pos-carrito-close"
+            onClick={() => setCarritoVisible(false)}
+            aria-label="Cerrar carrito"
+          >
+            <CloseIcon sx={{ fontSize: 18 }} />
+          </button>
         </div>
 
         <div className="pos-carrito-body">
@@ -469,6 +486,16 @@ export function PuntoVenta() {
           </div>
         )}
       </div>
+
+      {/* Floating cart toggle - only visible on mobile */}
+      <button
+        className="pos-carrito-fab"
+        onClick={() => setCarritoVisible(!carritoVisible)}
+        aria-label="Ver carrito"
+      >
+        <ShoppingCartIcon sx={{ fontSize: 22 }} />
+        {totalItems > 0 && <span className="pos-fab-badge">{totalItems}</span>}
+      </button>
     </div>
   );
 }

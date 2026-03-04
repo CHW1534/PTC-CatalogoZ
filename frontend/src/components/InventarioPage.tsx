@@ -6,6 +6,7 @@ import type { ProductoSucursal, CreateTransaccionDto } from '../types';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 type TipoMovimiento = 'ENTRADA' | 'SALIDA';
 
@@ -134,6 +135,7 @@ export function InventarioPage() {
     tipo: TipoMovimiento;
     productoSucursal: ProductoSucursal;
   } | null>(null);
+  const [showStockBajo, setShowStockBajo] = useState(false);
 
   // Obtener sucursales para estadisticas
   const { data: sucursales = [] } = useQuery({
@@ -160,15 +162,16 @@ export function InventarioPage() {
       (sum, ps) => sum + (ps.inventario?.cantidad || 0),
       0
     );
-    const stockBajo = productos.filter(
+    const productosStockBajo = productos.filter(
       (ps) => (ps.inventario?.cantidad || 0) <= 3
-    ).length;
+    );
 
     return {
       sucursales: sucursales.length,
       asignaciones: productos.length,
       unidadesTotales: totalUnidades,
-      stockBajo,
+      stockBajo: productosStockBajo.length,
+      productosStockBajo,
     };
   }, [productosData, sucursales]);
 
@@ -184,13 +187,6 @@ export function InventarioPage() {
 
   return (
     <div className="inventario-page">
-      <div className="page-header">
-        <div>
-          <h2>Inventario</h2>
-          <p className="page-subtitle">Stock por sucursal y movimientos</p>
-        </div>
-      </div>
-
       {/* Tarjetas de estadisticas */}
       <div className="stats-grid">
         <div className="stat-card">
@@ -205,9 +201,16 @@ export function InventarioPage() {
           <div className="stat-value text-warning">{stats.unidadesTotales}</div>
           <div className="stat-label">Unidades Totales</div>
         </div>
-        <div className="stat-card">
+        <div 
+          className={`stat-card ${stats.stockBajo > 0 ? 'clickable' : ''}`}
+          onClick={() => stats.stockBajo > 0 && setShowStockBajo(true)}
+          style={{ cursor: stats.stockBajo > 0 ? 'pointer' : 'default' }}
+        >
           <div className="stat-value text-danger">{stats.stockBajo}</div>
-          <div className="stat-label">Stock Bajo (&le;3)</div>
+          <div className="stat-label">Stock Bajo (≤3)</div>
+          {stats.stockBajo > 0 && (
+            <small className="stat-hint">Click para ver detalles</small>
+          )}
         </div>
       </div>
 
@@ -248,17 +251,17 @@ export function InventarioPage() {
                 const stock = ps.inventario?.cantidad || 0;
                 return (
                   <tr key={ps.id}>
-                    <td className="producto-nombre">{ps.producto.nombre}</td>
-                    <td>
+                    <td data-label="Producto" className="producto-nombre">{ps.producto.nombre}</td>
+                    <td data-label="Tipo">
                       <span className={`badge ${tipoInfo.className}`}>
                         <span className="badge-icon">%</span>
                         {tipoInfo.label}
                       </span>
                     </td>
-                    <td>{ps.producto.color} / {ps.producto.talla}</td>
-                    <td className="precio">${Number(ps.precio).toFixed(2)}</td>
-                    <td className={stock <= 3 ? 'stock-bajo' : ''}>{stock}</td>
-                    <td className="acciones">
+                    <td data-label="Color / Talla">{ps.producto.color} / {ps.producto.talla}</td>
+                    <td data-label="Precio" className="precio">${Number(ps.precio).toFixed(2)}</td>
+                    <td data-label="Stock" className={stock <= 3 ? 'stock-bajo' : ''}>{stock}</td>
+                    <td data-label="Acciones" className="acciones">
                       <button
                         className="btn-action btn-entrada"
                         onClick={() => setMovimiento({ tipo: 'ENTRADA', productoSucursal: ps })}
@@ -290,6 +293,61 @@ export function InventarioPage() {
           productoSucursal={movimiento.productoSucursal}
           onClose={() => setMovimiento(null)}
         />
+      )}
+
+      {/* Modal de Stock Bajo */}
+      {showStockBajo && (
+        <div className="modal-overlay" onClick={() => setShowStockBajo(false)}>
+          <div className="modal-content stock-bajo-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>
+                <WarningAmberIcon sx={{ color: '#e74c3c', marginRight: '8px' }} />
+                Productos con Stock Bajo
+              </h3>
+              <button className="modal-close" onClick={() => setShowStockBajo(false)}>
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              {stats.productosStockBajo.length === 0 ? (
+                <p className="text-center">No hay productos con stock bajo</p>
+              ) : (
+                <table className="stock-bajo-table">
+                  <thead>
+                    <tr>
+                      <th>Producto</th>
+                      <th>Color</th>
+                      <th>Talla</th>
+                      <th>Stock</th>
+                      <th>Sucursal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stats.productosStockBajo.map((ps) => (
+                      <tr key={ps.id}>
+                        <td>{ps.producto.nombre}</td>
+                        <td>
+                          <span 
+                            className="color-dot" 
+                            style={{ backgroundColor: ps.producto.color.toLowerCase() }}
+                          />
+                          {ps.producto.color}
+                        </td>
+                        <td>{ps.producto.talla}</td>
+                        <td className="stock-value">
+                          <span className={`stock-badge ${ps.inventario?.cantidad === 0 ? 'agotado' : 'bajo'}`}>
+                            {ps.inventario?.cantidad || 0}
+                          </span>
+                        </td>
+                        <td>{selectedSucursal?.nombre || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

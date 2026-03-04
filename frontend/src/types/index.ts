@@ -168,6 +168,22 @@ export interface CreateProductoRangoDto {
   descripcion?: string;
 }
 
+export interface TallaConCantidad {
+  talla: string;
+  cantidad?: number;
+}
+
+export interface CreateProductoMultiTallaDto {
+  nombre: string;
+  marca?: string;
+  modelo?: string;
+  color: string;
+  tallas: TallaConCantidad[];
+  tipo: TipoProducto;
+  descripcion?: string;
+  imagenUrl?: string;
+}
+
 export interface CreateSucursalDto {
   nombre: string;
   direccion?: string;

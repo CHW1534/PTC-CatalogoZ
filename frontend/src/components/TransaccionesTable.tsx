@@ -141,25 +141,25 @@ export function TransaccionesTable() {
             <tbody>
               {transacciones.map((t: Transaccion) => (
                 <tr key={t.id}>
-                  <td className="date-cell">{formatDate(t.createdAt)}</td>
-                  <td className="product-cell">
+                  <td data-label="Fecha" className="date-cell">{formatDate(t.createdAt)}</td>
+                  <td data-label="Producto" className="product-cell">
                     {t.productoSucursal?.producto?.nombre || '—'}
                     {t.productoSucursal?.producto?.talla && (
                       <span className="talla-badge">T{t.productoSucursal.producto.talla}</span>
                     )}
                   </td>
-                  <td>{t.productoSucursal?.sucursal?.nombre || '—'}</td>
-                  <td>
+                  <td data-label="Sucursal">{t.productoSucursal?.sucursal?.nombre || '—'}</td>
+                  <td data-label="Tipo">
                     <span className={`tipo-badge ${t.tipoTransaccion === TipoTransaccion.ENTRADA ? 'entrada' : 'salida'}`}>
                       {t.tipoTransaccion === TipoTransaccion.ENTRADA ? 'ENTRADA' : 'SALIDA'}
                     </span>
                   </td>
-                  <td className="cantidad-cell">{t.cantidad}</td>
-                  <td className="precio-cell">{formatCurrency(Number(t.precioUnitario))}</td>
-                  <td className={`total-cell ${t.tipoTransaccion === TipoTransaccion.SALIDA ? 'salida' : 'entrada'}`}>
+                  <td data-label="Cantidad" className="cantidad-cell">{t.cantidad}</td>
+                  <td data-label="Precio Unit." className="precio-cell">{formatCurrency(Number(t.precioUnitario))}</td>
+                  <td data-label="Total" className={`total-cell ${t.tipoTransaccion === TipoTransaccion.SALIDA ? 'salida' : 'entrada'}`}>
                     {formatCurrency(Number(t.total))}
                   </td>
-                  <td className="obs-cell">{t.observaciones || '—'}</td>
+                  <td data-label="Observaciones" className="obs-cell">{t.observaciones || '—'}</td>
                 </tr>
               ))}
             </tbody>

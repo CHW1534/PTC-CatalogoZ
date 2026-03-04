@@ -4,6 +4,7 @@ import type {
   ProductoSucursal,
   CreateProductoDto,
   CreateProductoRangoDto,
+  CreateProductoMultiTallaDto,
   AsignarProductoSucursalDto,
   FilterProducto,
   PaginatedResponse,
@@ -29,6 +30,11 @@ export const productosService = {
 
   createConRango: async (dto: CreateProductoRangoDto): Promise<Producto[]> => {
     const { data } = await api.post<Producto[]>('/productos/rango', dto);
+    return data;
+  },
+
+  createConMultiTallas: async (dto: CreateProductoMultiTallaDto): Promise<Producto[]> => {
+    const { data } = await api.post<Producto[]>('/productos/multi-talla', dto);
     return data;
   },
 

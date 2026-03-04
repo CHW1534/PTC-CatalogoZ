@@ -42,6 +42,12 @@ function MainApp() {
               <h2>Catalogo de Productos</h2>
               <div className="action-buttons">
                 <button
+                  className="btn-secondary"
+                  onClick={() => setShowAsignarForm(true)}
+                >
+                  Asignar a Sucursal
+                </button>
+                <button
                   className="btn-primary"
                   onClick={() => setShowProductoForm(true)}
                 >
@@ -54,7 +60,20 @@ function MainApp() {
         ) : vista === 'sucursales' ? (
           <SucursalesPage />
         ) : vista === 'inventario' ? (
-          <InventarioPage />
+          <>
+            <div className="dashboard-header">
+              <h2>Inventario</h2>
+              <div className="action-buttons">
+                <button
+                  className="btn-primary"
+                  onClick={() => setShowAsignarForm(true)}
+                >
+                  + Asignar Producto
+                </button>
+              </div>
+            </div>
+            <InventarioPage />
+          </>
         ) : vista === 'ventas' ? (
           <>
             <div className="dashboard-header">

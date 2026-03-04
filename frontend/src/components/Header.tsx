@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { useSucursal } from '../context';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface HeaderProps {
   vista: string;
@@ -8,6 +11,7 @@ interface HeaderProps {
 
 export function Header({ vista, onVistaChange }: HeaderProps) {
   const { sucursales, selectedSucursal, setSelectedSucursal, isLoading } = useSucursal();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
     { id: 'productos', label: 'Productos' },
@@ -16,6 +20,11 @@ export function Header({ vista, onVistaChange }: HeaderProps) {
     { id: 'transacciones', label: 'Transacciones' },
     { id: 'ventas', label: 'Punto de Venta' },
   ];
+
+  const handleNavClick = (id: string) => {
+    onVistaChange(id);
+    setMenuOpen(false);
+  };
 
   return (
     <header className="header-new">
@@ -31,12 +40,12 @@ export function Header({ vista, onVistaChange }: HeaderProps) {
         </div>
       </div>
 
-      <nav className="header-nav">
+      <nav className={`header-nav${menuOpen ? ' nav-open' : ''}`}>
         {navItems.map((item) => (
           <button
             key={item.id}
             className={`header-nav-item ${vista === item.id ? 'active' : ''}`}
-            onClick={() => onVistaChange(item.id)}
+            onClick={() => handleNavClick(item.id)}
           >
             {item.label}
           </button>
@@ -65,6 +74,14 @@ export function Header({ vista, onVistaChange }: HeaderProps) {
             ))}
           </select>
         )}
+        <button
+          className="hamburger-btn"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={menuOpen}
+        >
+          {menuOpen ? <CloseIcon sx={{ fontSize: 22 }} /> : <MenuIcon sx={{ fontSize: 22 }} />}
+        </button>
       </div>
     </header>
   );

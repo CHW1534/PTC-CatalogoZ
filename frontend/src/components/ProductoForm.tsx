@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { productosService } from '../services';
-import type { CreateProductoDto, CreateProductoRangoDto } from '../types';
+import type { CreateProductoDto, CreateProductoMultiTallaDto, TallaConCantidad } from '../types';
 import { TipoProducto, COLORES_PREDEFINIDOS, COLOR_HEX_MAP, TALLAS_ZAPATO, TALLAS_BOLSA } from '../types';
 
 interface Props {
@@ -11,7 +11,8 @@ interface Props {
 
 export function ProductoForm({ onClose, onSuccess }: Props) {
   const queryClient = useQueryClient();
-  const [modoRango, setModoRango] = useState(false);
+  const [modoMultiple, setModoMultiple] = useState(false);
+  const [tallasSeleccionadas, setTallasSeleccionadas] = useState<Record<string, number>>({});
   
   const [formData, setFormData] = useState({
     nombre: '',
@@ -19,9 +20,6 @@ export function ProductoForm({ onClose, onSuccess }: Props) {
     modelo: '',
     color: '',
     talla: '',
-    tallaInicio: '',
-    tallaFin: '',
-    incluirMedias: true,
     tipo: TipoProducto.ZAPATO as typeof TipoProducto.ZAPATO | typeof TipoProducto.BOLSA,
     descripcion: '',
     imagenUrl: '',
@@ -36,8 +34,8 @@ export function ProductoForm({ onClose, onSuccess }: Props) {
     },
   });
 
-  const createRangoMutation = useMutation({
-    mutationFn: (data: CreateProductoRangoDto) => productosService.createConRango(data),
+  const createMultiMutation = useMutation({
+    mutationFn: (data: CreateProductoMultiTallaDto) => productosService.createConMultiTallas(data),
     onSuccess: (productos) => {
       queryClient.invalidateQueries({ queryKey: ['productos'] });
       alert(`Se crearon ${productos.length} productos con tallas: ${productos.map(p => p.talla).join(', ')}`);
@@ -49,19 +47,27 @@ export function ProductoForm({ onClose, onSuccess }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (modoRango) {
-      const rangoDto: CreateProductoRangoDto = {
+    if (modoMultiple) {
+      const tallas: TallaConCantidad[] = Object.entries(tallasSeleccionadas)
+        .filter(([, cantidad]) => cantidad > 0)
+        .map(([talla, cantidad]) => ({ talla, cantidad }));
+      
+      if (tallas.length === 0) {
+        alert('Selecciona al menos una talla');
+        return;
+      }
+      
+      const multiDto: CreateProductoMultiTallaDto = {
         nombre: formData.nombre,
         marca: formData.marca || undefined,
         modelo: formData.modelo || undefined,
         color: formData.color,
-        tallaInicio: formData.tallaInicio,
-        tallaFin: formData.tallaFin,
-        incluirMedias: formData.incluirMedias,
+        tallas,
         tipo: formData.tipo,
         descripcion: formData.descripcion || undefined,
+        imagenUrl: formData.imagenUrl || undefined,
       };
-      createRangoMutation.mutate(rangoDto);
+      createMultiMutation.mutate(multiDto);
     } else {
       const dto: CreateProductoDto = {
         nombre: formData.nombre,
@@ -80,24 +86,43 @@ export function ProductoForm({ onClose, onSuccess }: Props) {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
-    setFormData((prev) => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const setTipo = (tipo: typeof TipoProducto.ZAPATO | typeof TipoProducto.BOLSA) => {
     setFormData((prev) => ({ 
       ...prev, 
       tipo,
-      talla: '', // Reset talla al cambiar tipo
+      talla: '',
+    }));
+    setTallasSeleccionadas({});
+  };
+
+  const toggleTalla = (talla: string) => {
+    setTallasSeleccionadas(prev => {
+      const newState = { ...prev };
+      if (newState[talla] !== undefined) {
+        delete newState[talla];
+      } else {
+        newState[talla] = 1;
+      }
+      return newState;
+    });
+  };
+
+  const updateCantidad = (talla: string, cantidad: number) => {
+    if (cantidad < 0) return;
+    setTallasSeleccionadas(prev => ({
+      ...prev,
+      [talla]: cantidad
     }));
   };
 
   const tallasDisponibles = formData.tipo === TipoProducto.ZAPATO ? TALLAS_ZAPATO : TALLAS_BOLSA;
-  const isPending = createMutation.isPending || createRangoMutation.isPending;
+  const isPending = createMutation.isPending || createMultiMutation.isPending;
+  const tallasCount = Object.keys(tallasSeleccionadas).length;
+  const totalPiezas = Object.values(tallasSeleccionadas).reduce((sum, c) => sum + c, 0);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -169,7 +194,19 @@ export function ProductoForm({ onClose, onSuccess }: Props) {
             </div>
           </div>
 
-          {!modoRango && (
+          {/* Modo de creación */}
+          <div className="form-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={modoMultiple}
+                onChange={(e) => setModoMultiple(e.target.checked)}
+              />
+              <span>Crear con múltiples tallas</span>
+            </label>
+          </div>
+
+          {!modoMultiple ? (
             <div className="form-group">
               <label>Talla</label>
               <div className="talla-selector">
@@ -185,71 +222,61 @@ export function ProductoForm({ onClose, onSuccess }: Props) {
                 ))}
               </div>
             </div>
-          )}
-
-          {/* Modo rango de tallas */}
-          <div className="form-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={modoRango}
-                onChange={(e) => setModoRango(e.target.checked)}
-              />
-              <span>Crear con rango de tallas</span>
-            </label>
-          </div>
-
-          {modoRango && (
-            <>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Talla Inicio</label>
-                  <div className="talla-selector compact">
-                    {tallasDisponibles.map((talla) => (
+          ) : (
+            <div className="form-group">
+              <label>Selecciona tallas y cantidad de cada una</label>
+              <div className="multi-talla-grid">
+                {tallasDisponibles.map((talla) => {
+                  const isSelected = tallasSeleccionadas[talla] !== undefined;
+                  const cantidad = tallasSeleccionadas[talla] ?? 0;
+                  return (
+                    <div 
+                      key={talla} 
+                      className={`multi-talla-item ${isSelected ? 'selected' : ''}`}
+                    >
                       <button
-                        key={talla}
                         type="button"
-                        className={`talla-chip ${formData.tallaInicio === talla ? 'selected' : ''}`}
-                        onClick={() => setFormData(prev => ({ ...prev, tallaInicio: talla }))}
+                        className={`talla-chip-multi ${isSelected ? 'selected' : ''}`}
+                        onClick={() => toggleTalla(talla)}
                       >
                         {talla}
                       </button>
-                    ))}
-                  </div>
+                      {isSelected && (
+                        <div className="cantidad-input">
+                          <button
+                            type="button"
+                            className="qty-btn"
+                            onClick={() => updateCantidad(talla, cantidad - 1)}
+                          >
+                            −
+                          </button>
+                          <input
+                            type="number"
+                            min="0"
+                            value={cantidad}
+                            onChange={(e) => updateCantidad(talla, parseInt(e.target.value) || 0)}
+                          />
+                          <button
+                            type="button"
+                            className="qty-btn"
+                            onClick={() => updateCantidad(talla, cantidad + 1)}
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {tallasCount > 0 && (
+                <div className="tallas-preview">
+                  <small>
+                    {tallasCount} talla{tallasCount > 1 ? 's' : ''} seleccionada{tallasCount > 1 ? 's' : ''} • {totalPiezas} pieza{totalPiezas !== 1 ? 's' : ''} total
+                  </small>
                 </div>
-                <div className="form-group">
-                  <label>Talla Fin</label>
-                  <div className="talla-selector compact">
-                    {tallasDisponibles.map((talla) => (
-                      <button
-                        key={talla}
-                        type="button"
-                        className={`talla-chip ${formData.tallaFin === talla ? 'selected' : ''}`}
-                        onClick={() => setFormData(prev => ({ ...prev, tallaFin: talla }))}
-                      >
-                        {talla}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="incluirMedias"
-                    checked={formData.incluirMedias}
-                    onChange={handleChange}
-                  />
-                  <span>Incluir medias tallas (35.5, 36.5...)</span>
-                </label>
-              </div>
-              <div className="tallas-preview">
-                <small>
-                  Se crearán tallas: {previsualizarTallas(formData.tallaInicio, formData.tallaFin, formData.incluirMedias)}
-                </small>
-              </div>
-            </>
+              )}
+            </div>
           )}
 
           {/* Marca y Modelo */}
@@ -312,40 +339,15 @@ export function ProductoForm({ onClose, onSuccess }: Props) {
               className="btn-primary"
               disabled={isPending}
             >
-              {isPending ? 'Creando...' : modoRango ? 'Crear Productos' : 'Crear Producto'}
+              {isPending ? 'Creando...' : modoMultiple ? 'Crear Productos' : 'Crear Producto'}
             </button>
           </div>
 
-          {(createMutation.isError || createRangoMutation.isError) && (
+          {(createMutation.isError || createMultiMutation.isError) && (
             <div className="error-message">Error al crear producto</div>
           )}
         </form>
       </div>
     </div>
   );
-}
-
-// Función para previsualizar las tallas que se crearán
-function previsualizarTallas(inicio: string, fin: string, incluirMedias: boolean): string {
-  const tallaInicio = parseFloat(inicio);
-  const tallaFin = parseFloat(fin);
-  
-  if (isNaN(tallaInicio) || isNaN(tallaFin) || tallaInicio > tallaFin) {
-    return inicio || '...';
-  }
-
-  const tallas: string[] = [];
-  const incremento = incluirMedias ? 0.5 : 1;
-  const maxMostrar = 8;
-
-  for (let t = tallaInicio; t <= tallaFin; t += incremento) {
-    const tallaStr = Number.isInteger(t) ? t.toString() : t.toFixed(1);
-    tallas.push(tallaStr);
-    if (tallas.length >= maxMostrar) {
-      tallas.push('...');
-      break;
-    }
-  }
-
-  return tallas.join(', ') || '...';
 }

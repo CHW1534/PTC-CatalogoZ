@@ -13,6 +13,7 @@ import { ProductoService } from './producto.service';
 import {
   CreateProductoDto,
   CreateProductoRangoDto,
+  CreateProductoMultiTallaDto,
   UpdateProductoDto,
   AsignarProductoSucursalDto,
   UpdateProductoSucursalDto,
@@ -33,6 +34,11 @@ export class ProductoController {
   @Post('productos/rango')
   createConRango(@Body() dto: CreateProductoRangoDto) {
     return this.productoService.createConRango(dto);
+  }
+
+  @Post('productos/multi-talla')
+  createConMultiTallas(@Body() dto: CreateProductoMultiTallaDto) {
+    return this.productoService.createConMultiTallas(dto);
   }
 
   @Get('productos')

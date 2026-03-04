@@ -8,3 +8,4 @@ export { Ticket } from './Ticket';
 export { TransaccionesTable } from './TransaccionesTable';
 export { InventarioPage } from './InventarioPage';
 export { SucursalesPage } from './SucursalesPage';
+export { MonitorVentas } from './MonitorVentas';

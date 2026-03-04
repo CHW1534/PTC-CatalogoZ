@@ -46,80 +46,113 @@ function MovimientoModal({ tipo, productoSucursal, onClose }: MovimientoModalPro
   const maxSalida = productoSucursal.inventario?.cantidad || 0;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>
+    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-center p-5 sm:p-6 border-b border-gray-100 bg-gray-50/50">
+          <h3 className="text-xl font-bold text-gray-900">
             {tipo === 'ENTRADA' ? 'Registrar Entrada' : 'Registrar Salida'}
           </h3>
-          <button className="modal-close" onClick={onClose}>
-            x
+          <button className="p-2 -mr-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors" onClick={onClose}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
           </button>
         </div>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Producto</label>
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
+          <div className="space-y-1.5">
+            <label className="block text-sm font-semibold text-gray-700">Producto</label>
             <input
               type="text"
+              className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 text-gray-600 text-sm rounded-xl cursor-not-allowed outline-none"
               value={productoSucursal.producto.nombre}
               disabled
             />
           </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Color</label>
-              <input type="text" value={productoSucursal.producto.color} disabled />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-gray-700">Color</label>
+              <input
+                type="text"
+                className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 text-gray-600 text-sm rounded-xl cursor-not-allowed outline-none"
+                value={productoSucursal.producto.color}
+                disabled
+              />
             </div>
-            <div className="form-group">
-              <label>Talla</label>
-              <input type="text" value={productoSucursal.producto.talla} disabled />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-gray-700">Talla</label>
+              <input
+                type="text"
+                className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 text-gray-600 text-sm rounded-xl cursor-not-allowed outline-none"
+                value={productoSucursal.producto.talla}
+                disabled
+              />
             </div>
           </div>
-          <div className="form-group">
-            <label>Stock Actual</label>
-            <input
-              type="text"
-              value={productoSucursal.inventario?.cantidad || 0}
-              disabled
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-gray-700">Stock Actual</label>
+              <input
+                type="text"
+                className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 text-gray-600 text-sm rounded-xl cursor-not-allowed outline-none font-bold"
+                value={productoSucursal.inventario?.cantidad || 0}
+                disabled
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-gray-700">Cantidad *</label>
+              <input
+                type="number"
+                min={1}
+                max={tipo === 'SALIDA' ? maxSalida : undefined}
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                value={cantidad}
+                onChange={(e) => setCantidad(Number(e.target.value))}
+                required
+              />
+              {tipo === 'SALIDA' && maxSalida > 0 && (
+                <span className="block text-xs text-orange-600 font-medium mt-1">Máximo disponible: {maxSalida}</span>
+              )}
+            </div>
           </div>
-          <div className="form-group">
-            <label>Cantidad *</label>
-            <input
-              type="number"
-              min={1}
-              max={tipo === 'SALIDA' ? maxSalida : undefined}
-              value={cantidad}
-              onChange={(e) => setCantidad(Number(e.target.value))}
-              required
-            />
-            {tipo === 'SALIDA' && maxSalida > 0 && (
-              <small className="text-muted">Maximo disponible: {maxSalida}</small>
-            )}
-          </div>
-          <div className="form-group">
-            <label>Observaciones</label>
+          <div className="space-y-1.5 pt-1">
+            <label className="block text-sm font-semibold text-gray-700">Observaciones</label>
             <textarea
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none"
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
               placeholder="Opcional"
               rows={2}
             />
           </div>
-          <div className="form-actions">
-            <button type="button" className="btn-secondary" onClick={onClose}>
+
+          <div className="flex justify-end gap-3 pt-5 mt-2 border-t border-gray-100">
+            <button type="button" className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-gray-200" onClick={onClose}>
               Cancelar
             </button>
             <button
               type="submit"
-              className={tipo === 'ENTRADA' ? 'btn-success' : 'btn-danger'}
+              className={`px-5 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[150px] ${tipo === 'ENTRADA'
+                  ? 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500/20'
+                  : 'bg-red-600 hover:bg-red-700 focus:ring-red-500/20'
+                }`}
               disabled={mutation.isPending || (tipo === 'SALIDA' && cantidad > maxSalida)}
             >
-              {mutation.isPending ? 'Procesando...' : `Confirmar ${tipo === 'ENTRADA' ? 'Entrada' : 'Salida'}`}
+              {mutation.isPending ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Procesando...
+                </>
+              ) : (
+                `Confirmar ${tipo === 'ENTRADA' ? 'Entrada' : 'Salida'}`
+              )}
             </button>
           </div>
+
           {mutation.isError && (
-            <div className="error-message">
+            <div className="p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm font-medium mt-4">
               Error al registrar el movimiento
             </div>
           )}
@@ -178,111 +211,158 @@ export function InventarioPage() {
   const productos = productosData?.data || [];
 
   const formatTipo = (tipo: string) => {
-    const tipos: Record<string, { label: string; className: string }> = {
-      ZAPATO: { label: 'Zapato', className: 'badge-purple' },
-      BOLSA: { label: 'Bolsa', className: 'badge-blue' },
+    const tipos: Record<string, { label: string; bg: string; text: string }> = {
+      ZAPATO: { label: 'Zapato', bg: 'bg-indigo-100', text: 'text-indigo-700' },
+      BOLSA: { label: 'Bolsa', bg: 'bg-emerald-100', text: 'text-emerald-700' },
     };
-    return tipos[tipo] || { label: tipo, className: 'badge-gray' };
+    return tipos[tipo] || { label: tipo, bg: 'bg-gray-100', text: 'text-gray-700' };
   };
 
   return (
-    <div className="inventario-page">
+    <div className="w-full">
       {/* Tarjetas de estadisticas */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-value text-primary">{stats.sucursales}</div>
-          <div className="stat-label">Sucursales</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-center transition-shadow hover:shadow-md">
+          <div className="text-3xl font-black text-blue-600 mb-1">{stats.sucursales}</div>
+          <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Sucursales</div>
         </div>
-        <div className="stat-card">
-          <div className="stat-value text-secondary">{stats.asignaciones}</div>
-          <div className="stat-label">Asignaciones</div>
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-center transition-shadow hover:shadow-md">
+          <div className="text-3xl font-black text-emerald-600 mb-1">{stats.asignaciones}</div>
+          <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Asignaciones</div>
         </div>
-        <div className="stat-card">
-          <div className="stat-value text-warning">{stats.unidadesTotales}</div>
-          <div className="stat-label">Unidades Totales</div>
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-center transition-shadow hover:shadow-md">
+          <div className="text-3xl font-black text-amber-500 mb-1">{stats.unidadesTotales}</div>
+          <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Unidades Totales</div>
         </div>
-        <div 
-          className={`stat-card ${stats.stockBajo > 0 ? 'clickable' : ''}`}
+        <div
+          className={`bg-white rounded-2xl p-6 border shadow-sm flex flex-col justify-center transition-all ${stats.stockBajo > 0
+              ? 'border-red-200 hover:border-red-300 hover:shadow-md cursor-pointer group reltive'
+              : 'border-gray-100'
+            }`}
           onClick={() => stats.stockBajo > 0 && setShowStockBajo(true)}
-          style={{ cursor: stats.stockBajo > 0 ? 'pointer' : 'default' }}
         >
-          <div className="stat-value text-danger">{stats.stockBajo}</div>
-          <div className="stat-label">Stock Bajo (≤3)</div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className={`text-3xl font-black ${stats.stockBajo > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+              {stats.stockBajo}
+            </span>
+            {stats.stockBajo > 0 && (
+              <span className="flex h-3 w-3 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+            )}
+          </div>
+          <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Stock Bajo (≤3)</div>
           {stats.stockBajo > 0 && (
-            <small className="stat-hint">Click para ver detalles</small>
+            <small className="text-xs text-red-500 font-medium mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span>Click para ver detalles</span>
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </small>
           )}
         </div>
       </div>
 
       {/* Tabla de inventario */}
-      <div className="inventario-table-container">
-        <div className="table-header">
-          <div className="table-icon">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="flex items-center px-6 py-5 border-b border-gray-100 bg-gray-50/50">
+          <div className="p-2 bg-blue-100 text-blue-600 rounded-lg mr-4">
             <InventoryIcon />
           </div>
-          <span>Inventario — {selectedSucursal ? selectedSucursal.nombre : 'Seleccione una sucursal'}</span>
+          <h2 className="text-lg font-bold text-gray-900">
+            Inventario — <span className="text-gray-500 font-medium">{selectedSucursal ? selectedSucursal.nombre : 'Seleccione una sucursal'}</span>
+          </h2>
         </div>
 
         {!selectedSucursal ? (
-          <div className="empty-state">
-            <p>Seleccione una sucursal en el encabezado para ver el inventario</p>
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <div className="bg-gray-100 p-4 rounded-full mb-4">
+              <InventoryIcon sx={{ fontSize: 40, color: '#9ca3af' }} />
+            </div>
+            <p className="text-gray-500 font-medium">Seleccione una sucursal en el encabezado para ver el inventario</p>
           </div>
         ) : isLoading ? (
-          <div className="loading-state">Cargando inventario...</div>
+          <div className="flex flex-col items-center justify-center py-16">
+            <svg className="animate-spin mb-4 h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span className="text-gray-500 font-medium">Cargando inventario...</span>
+          </div>
         ) : productos.length === 0 ? (
-          <div className="empty-state">
-            <p>No hay productos asignados a esta sucursal</p>
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <div className="bg-gray-100 p-4 rounded-full mb-4">
+              <InventoryIcon sx={{ fontSize: 40, color: '#9ca3af' }} />
+            </div>
+            <p className="text-gray-500 font-medium text-lg">No hay productos asignados a esta sucursal</p>
+            <p className="text-sm text-gray-400 mt-1">Asigna productos desde el catálogo para gestionar el inventario.</p>
           </div>
         ) : (
-          <table className="inventario-table">
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th>Tipo</th>
-                <th>Color / Talla</th>
-                <th>Precio</th>
-                <th>Stock</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productos.map((ps) => {
-                const tipoInfo = formatTipo(ps.producto.tipo);
-                const stock = ps.inventario?.cantidad || 0;
-                return (
-                  <tr key={ps.id}>
-                    <td data-label="Producto" className="producto-nombre">{ps.producto.nombre}</td>
-                    <td data-label="Tipo">
-                      <span className={`badge ${tipoInfo.className}`}>
-                        <span className="badge-icon">%</span>
-                        {tipoInfo.label}
-                      </span>
-                    </td>
-                    <td data-label="Color / Talla">{ps.producto.color} / {ps.producto.talla}</td>
-                    <td data-label="Precio" className="precio">${Number(ps.precio).toFixed(2)}</td>
-                    <td data-label="Stock" className={stock <= 3 ? 'stock-bajo' : ''}>{stock}</td>
-                    <td data-label="Acciones" className="acciones">
-                      <button
-                        className="btn-action btn-entrada"
-                        onClick={() => setMovimiento({ tipo: 'ENTRADA', productoSucursal: ps })}
-                      >
-                        <TrendingUpIcon sx={{ fontSize: 16 }} />
-                        Entrada
-                      </button>
-                      <button
-                        className="btn-action btn-salida"
-                        onClick={() => setMovimiento({ tipo: 'SALIDA', productoSucursal: ps })}
-                        disabled={stock === 0}
-                      >
-                        <TrendingDownIcon sx={{ fontSize: 16 }} />
-                        Salida
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left whitespace-nowrap">
+              <thead className="bg-gray-50/80 uppercase text-xs font-bold text-gray-500 tracking-wider">
+                <tr>
+                  <th className="px-6 py-4 border-b border-gray-100">Producto</th>
+                  <th className="px-6 py-4 border-b border-gray-100">Tipo</th>
+                  <th className="px-6 py-4 border-b border-gray-100">Color / Talla</th>
+                  <th className="px-6 py-4 border-b border-gray-100">Precio</th>
+                  <th className="px-6 py-4 border-b border-gray-100">Stock</th>
+                  <th className="px-6 py-4 border-b border-gray-100 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {productos.map((ps) => {
+                  const tipoInfo = formatTipo(ps.producto.tipo);
+                  const stock = ps.inventario?.cantidad || 0;
+                  return (
+                    <tr key={ps.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 font-bold text-gray-900">{ps.producto.nombre}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${tipoInfo.bg} ${tipoInfo.text}`}>
+                          {tipoInfo.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-900 font-medium">{ps.producto.color}</span>
+                          <span className="text-gray-300">•</span>
+                          <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 text-sm">{ps.producto.talla}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-medium text-gray-900">${Number(ps.precio).toFixed(2)}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${stock === 0
+                            ? 'bg-red-50 text-red-700 border-red-200'
+                            : stock <= 3
+                              ? 'bg-orange-50 text-orange-700 border-orange-200'
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}>
+                          {stock}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right space-x-2">
+                        <button
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 rounded-lg text-sm font-semibold transition-colors focus:ring-2 focus:ring-emerald-500/20"
+                          onClick={() => setMovimiento({ tipo: 'ENTRADA', productoSucursal: ps })}
+                        >
+                          <TrendingUpIcon sx={{ fontSize: 16 }} />
+                          Entrada
+                        </button>
+                        <button
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800 rounded-lg text-sm font-semibold transition-colors focus:ring-2 focus:ring-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => setMovimiento({ tipo: 'SALIDA', productoSucursal: ps })}
+                          disabled={stock === 0}
+                          title={stock === 0 ? "Sin stock para dar salida" : "Registrar salida"}
+                        >
+                          <TrendingDownIcon sx={{ fontSize: 16 }} />
+                          Salida
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
@@ -297,54 +377,60 @@ export function InventarioPage() {
 
       {/* Modal de Stock Bajo */}
       {showStockBajo && (
-        <div className="modal-overlay" onClick={() => setShowStockBajo(false)}>
-          <div className="modal-content stock-bajo-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>
-                <WarningAmberIcon sx={{ color: '#e74c3c', marginRight: '8px' }} />
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowStockBajo(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-5 sm:p-6 border-b border-red-100 bg-red-50/50">
+              <h3 className="text-xl font-bold text-red-900 flex items-center gap-2">
+                <WarningAmberIcon sx={{ color: '#dc2626' }} />
                 Productos con Stock Bajo
               </h3>
-              <button className="modal-close" onClick={() => setShowStockBajo(false)}>
-                ×
+              <button className="p-2 -mr-2 text-red-400 hover:text-red-600 hover:bg-red-100 rounded-full transition-colors" onClick={() => setShowStockBajo(false)}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
               </button>
             </div>
-            <div className="modal-body">
+            <div className="p-0 overflow-y-auto max-h-[60vh]">
               {stats.productosStockBajo.length === 0 ? (
-                <p className="text-center">No hay productos con stock bajo</p>
+                <div className="p-8 text-center text-gray-500 font-medium">No hay productos con stock bajo</div>
               ) : (
-                <table className="stock-bajo-table">
-                  <thead>
+                <table className="w-full text-left whitespace-nowrap">
+                  <thead className="bg-red-50/30 uppercase text-xs font-bold text-red-500 tracking-wider sticky top-0 backdrop-blur-sm">
                     <tr>
-                      <th>Producto</th>
-                      <th>Color</th>
-                      <th>Talla</th>
-                      <th>Stock</th>
-                      <th>Sucursal</th>
+                      <th className="px-6 py-3 border-b border-red-100">Producto</th>
+                      <th className="px-6 py-3 border-b border-red-100">Color</th>
+                      <th className="px-6 py-3 border-b border-red-100">Talla</th>
+                      <th className="px-6 py-3 border-b border-red-100">Stock</th>
+                      <th className="px-6 py-3 border-b border-red-100">Sucursal</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-gray-100">
                     {stats.productosStockBajo.map((ps) => (
-                      <tr key={ps.id}>
-                        <td>{ps.producto.nombre}</td>
-                        <td>
-                          <span 
-                            className="color-dot" 
-                            style={{ backgroundColor: ps.producto.color.toLowerCase() }}
-                          />
-                          {ps.producto.color}
+                      <tr key={ps.id} className="hover:bg-red-50/30 transition-colors">
+                        <td className="px-6 py-4 font-bold text-gray-900">{ps.producto.nombre}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2 text-gray-700">
+                            {ps.producto.color}
+                          </div>
                         </td>
-                        <td>{ps.producto.talla}</td>
-                        <td className="stock-value">
-                          <span className={`stock-badge ${ps.inventario?.cantidad === 0 ? 'agotado' : 'bajo'}`}>
+                        <td className="px-6 py-4 font-mono text-gray-600 bg-gray-50 px-2 py-0.5 rounded text-sm w-fit">{ps.producto.talla}</td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border ${ps.inventario?.cantidad === 0
+                              ? 'bg-red-100 text-red-700 border-red-200'
+                              : 'bg-orange-100 text-orange-700 border-orange-200'
+                            }`}>
                             {ps.inventario?.cantidad || 0}
                           </span>
                         </td>
-                        <td>{selectedSucursal?.nombre || '-'}</td>
+                        <td className="px-6 py-4 text-gray-500 text-sm">{selectedSucursal?.nombre || '-'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               )}
+            </div>
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+              <button type="button" className="px-5 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-gray-200" onClick={() => setShowStockBajo(false)}>
+                Cerrar
+              </button>
             </div>
           </div>
         </div>

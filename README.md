@@ -197,30 +197,19 @@ PTCRETAIL/
 | `/api/transacciones/entrada` | POST | Registrar entrada de stock |
 | `/api/transacciones/salida` | POST | Registrar salida de stock |
 
-## Funcionalidades
+### Funcionalidades y Beneficios Clave
 
-### Implementadas
-- [x] CRUD de productos
-- [x] CRUD de sucursales
-- [x] Filtros por tipo, color y talla
-- [x] Buscador por nombre/marca
-- [x] Multi-sucursal con precios independientes
-- [x] Consulta de disponibilidad cross-sucursal
-- [x] Gestion de inventario con pagina dedicada
-- [x] Registro de transacciones (entradas/salidas)
-- [x] Soft delete para productos
-- [x] Paginacion
-- [x] Punto de venta con carrito de compras
-- [x] Generacion de tickets de venta
-- [x] Panel de administracion de sucursales
-- [x] Dashboard con estadisticas por seccion
+- **Punto de Venta Dinámico**: Sistema de cobro donde puedes buscar productos, elegir tallas, agregar al carrito y procesar ventas con un ticket de compra.
+- **Catálogo de Productos**: Módulo de administración de inventarios base con distintos atributos como colores y tallas.
+- **Monitor de Ventas**: Módulo analítico por sucursal para consultar entradas, total de ventas y los productos de mayor movimiento en tienda.
+- **Control Multi-Sucursal**: Gestión de distintas sucursales desde el mismo panel, manejando inventarios separados y precios por tienda.
+- **Inventario Detallado**: Seguimiento de entradas y salidas de mercancía para auditar faltantes o stock.
+- **Historial de Transacciones**: Consulta detallada de cada movimiento de stock y venta cobrada.
 
-### Características Técnicas
-- Validación con class-validator
-- TypeScript estricto en ambos proyectos
-- Arquitectura modular en NestJS
-- TanStack Query para cache de datos
-- Responsive design
+### Aspectos Técnicos
+- **Diseño Moderno**: Interfaz construida mediante **Tailwind CSS** y **Material UI Icons** bajo estándares de experiencia de usuario limpia.
+- **Eficiencia**: Integración de TanStack Query para el manejo de caché en las consultas y evitar demoras de carga entre secciones.
+- **Backend Confiable**: Base de datos PostgreSQL interactuando mediante framework NestJS garantizando la integridad relacional de la información.
 
 ## Notas de Desarrollo
 

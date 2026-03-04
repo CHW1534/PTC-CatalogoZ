@@ -300,9 +300,4 @@ docker-compose up --build -d
   docker-compose build --no-cache frontend; docker-compose up -d frontend
   ```
 
-## 5. Notas
-- El seed de datos se ejecuta automáticamente la primera vez (`RUN_SEED=true`)
-- Cambia las variables de entorno si necesitas personalizar usuarios, contraseñas o puertos.
-- Los archivos temporales `tmpclaude-*` no deben subirse a git.
-
 ---

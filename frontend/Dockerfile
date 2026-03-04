@@ -3,8 +3,8 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Argumento para la URL del API
-ARG VITE_API_URL=http://localhost:3000/api
+# Argumento para la URL del API (relativo para usar proxy de Nginx)
+ARG VITE_API_URL=/api
 
 # Variable de entorno para el build
 ENV VITE_API_URL=$VITE_API_URL

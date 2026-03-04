@@ -49,7 +49,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=http://localhost:3001/api
+        - VITE_API_URL=/api
     container_name: ptcretail-frontend
     ports:
       - "80:80"

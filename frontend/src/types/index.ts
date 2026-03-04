@@ -5,7 +5,7 @@ export const TipoProducto = {
 
 export type TipoProducto = (typeof TipoProducto)[keyof typeof TipoProducto];
 
-// Colores predefinidos para productos
+// Colores predefinidos para productos con valores hex
 export const COLORES_PREDEFINIDOS = [
   'Negro',
   'Blanco',
@@ -24,6 +24,26 @@ export const COLORES_PREDEFINIDOS = [
   'Plateado',
   'Multicolor',
 ] as const;
+
+// Mapa de colores a valores hex para UI
+export const COLOR_HEX_MAP: Record<string, string> = {
+  'Negro': '#1a1a1a',
+  'Blanco': '#ffffff',
+  'Café': '#6f4e37',
+  'Marrón': '#8b4513',
+  'Beige': '#f5f5dc',
+  'Gris': '#808080',
+  'Azul': '#2563eb',
+  'Rojo': '#dc2626',
+  'Rosa': '#ec4899',
+  'Verde': '#16a34a',
+  'Amarillo': '#eab308',
+  'Naranja': '#f97316',
+  'Morado': '#9333ea',
+  'Dorado': '#d4af37',
+  'Plateado': '#c0c0c0',
+  'Multicolor': 'linear-gradient(135deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff)',
+};
 
 // Tallas predefinidas para zapatos (sistema MX)
 export const TALLAS_ZAPATO = [

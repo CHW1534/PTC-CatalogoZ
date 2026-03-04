@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { productosService } from '../services';
 import type { CreateProductoDto, CreateProductoRangoDto } from '../types';
-import { TipoProducto, COLORES_PREDEFINIDOS, TALLAS_ZAPATO, TALLAS_BOLSA } from '../types';
+import { TipoProducto, COLORES_PREDEFINIDOS, COLOR_HEX_MAP, TALLAS_ZAPATO, TALLAS_BOLSA } from '../types';
 
 interface Props {
   onClose: () => void;
@@ -145,41 +145,47 @@ export function ProductoForm({ onClose, onSuccess }: Props) {
           </div>
 
           {/* Color y Talla */}
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="color">Color</label>
-              <select
-                id="color"
-                name="color"
-                required
-                value={formData.color}
-                onChange={handleChange}
-              >
-                <option value="">Seleccionar</option>
-                {COLORES_PREDEFINIDOS.map((color) => (
-                  <option key={color} value={color}>{color}</option>
-                ))}
-              </select>
-            </div>
-            
-            {!modoRango && (
-              <div className="form-group">
-                <label htmlFor="talla">Talla</label>
-                <select
-                  id="talla"
-                  name="talla"
-                  required={!modoRango}
-                  value={formData.talla}
-                  onChange={handleChange}
+          <div className="form-group">
+            <label>Color</label>
+            <div className="color-selector">
+              {COLORES_PREDEFINIDOS.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  className={`color-option ${formData.color === color ? 'selected' : ''}`}
+                  onClick={() => setFormData(prev => ({ ...prev, color }))}
+                  title={color}
                 >
-                  <option value="">Seleccionar</option>
-                  {tallasDisponibles.map((talla) => (
-                    <option key={talla} value={talla}>{talla}</option>
-                  ))}
-                </select>
-              </div>
-            )}
+                  <span 
+                    className="color-swatch"
+                    style={{ 
+                      background: COLOR_HEX_MAP[color],
+                      border: color === 'Blanco' ? '1px solid #ddd' : 'none'
+                    }}
+                  />
+                  <span className="color-name">{color}</span>
+                </button>
+              ))}
+            </div>
           </div>
+
+          {!modoRango && (
+            <div className="form-group">
+              <label>Talla</label>
+              <div className="talla-selector">
+                {tallasDisponibles.map((talla) => (
+                  <button
+                    key={talla}
+                    type="button"
+                    className={`talla-chip ${formData.talla === talla ? 'selected' : ''}`}
+                    onClick={() => setFormData(prev => ({ ...prev, talla }))}
+                  >
+                    {talla}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Modo rango de tallas */}
           <div className="form-group">
@@ -197,34 +203,34 @@ export function ProductoForm({ onClose, onSuccess }: Props) {
             <>
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="tallaInicio">Talla Inicio</label>
-                  <select
-                    id="tallaInicio"
-                    name="tallaInicio"
-                    required={modoRango}
-                    value={formData.tallaInicio}
-                    onChange={handleChange}
-                  >
-                    <option value="">Seleccionar</option>
+                  <label>Talla Inicio</label>
+                  <div className="talla-selector compact">
                     {tallasDisponibles.map((talla) => (
-                      <option key={talla} value={talla}>{talla}</option>
+                      <button
+                        key={talla}
+                        type="button"
+                        className={`talla-chip ${formData.tallaInicio === talla ? 'selected' : ''}`}
+                        onClick={() => setFormData(prev => ({ ...prev, tallaInicio: talla }))}
+                      >
+                        {talla}
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="tallaFin">Talla Fin</label>
-                  <select
-                    id="tallaFin"
-                    name="tallaFin"
-                    required={modoRango}
-                    value={formData.tallaFin}
-                    onChange={handleChange}
-                  >
-                    <option value="">Seleccionar</option>
+                  <label>Talla Fin</label>
+                  <div className="talla-selector compact">
                     {tallasDisponibles.map((talla) => (
-                      <option key={talla} value={talla}>{talla}</option>
+                      <button
+                        key={talla}
+                        type="button"
+                        className={`talla-chip ${formData.tallaFin === talla ? 'selected' : ''}`}
+                        onClick={() => setFormData(prev => ({ ...prev, tallaFin: talla }))}
+                      >
+                        {talla}
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
               </div>
               <div className="form-group">

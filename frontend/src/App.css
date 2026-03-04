@@ -1852,6 +1852,9 @@ button {
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
 .tipo-btn:hover {
@@ -1867,6 +1870,98 @@ button {
 
 .tipo-btn .tipo-icon {
   font-size: 1.75rem;
+}
+
+/* Selector de Colores Visual */
+.color-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.color-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 52px;
+}
+
+.color-option:hover {
+  background: var(--background);
+}
+
+.color-option.selected {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.color-name {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.color-option.selected .color-name {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Selector de Tallas con Chips */
+.talla-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.talla-selector.compact {
+  gap: 0.35rem;
+}
+
+.talla-chip {
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 48px;
+  text-align: center;
+}
+
+.talla-selector.compact .talla-chip {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  min-width: 40px;
+}
+
+.talla-chip:hover {
+  border-color: var(--primary);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.talla-chip.selected {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: white;
 }
 
 /* Preview de Imagen */

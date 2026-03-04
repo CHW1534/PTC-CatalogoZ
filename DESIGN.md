@@ -1,14 +1,130 @@
-# DESIGN.md - Catálogo de Productos (Zapatería y Bolsas)
+# DESIGN.md - Catalogo de Productos (Zapateria y Bolsas)
 
-## Stack Tecnológico
+## Stack Tecnologico
 
-| Capa | Tecnología | Justificación |
+| Capa | Tecnologia | Justificacion |
 |------|------------|---------------|
-| **Backend** | NestJS | Framework robusto con arquitectura modular y TypeScript nativo. Facilita implementación de clean architecture |
-| **ORM** | TypeORM | Integración nativa con NestJS, decoradores para entidades, soporte soft-delete |
+| **Backend** | NestJS | Framework robusto con arquitectura modular y TypeScript nativo. Facilita implementacion de clean architecture |
+| **ORM** | TypeORM | Integracion nativa con NestJS, decoradores para entidades, soporte soft-delete |
 | **Base de Datos** | PostgreSQL | ACID compliance, soporte nativo de ENUM, robustez para datos transaccionales |
-| **Frontend** | React + Vite | Requisito del enunciado. Vite ofrece build rápido y HMR eficiente |
-| **State Management** | TanStack Query | Cache automático, refetch inteligente, manejo de loading/error |
+| **Frontend** | React + Vite | Requisito del enunciado. Vite ofrece build rapido y HMR eficiente |
+| **State Management** | TanStack Query | Cache automatico, refetch inteligente, manejo de loading/error |
+| **Contenedores** | Docker + Docker Compose | Despliegue consistente, aislamiento de dependencias, facilita demo y produccion |
+
+---
+
+## Justificacion de Docker
+
+### Por que Docker?
+
+1. **Consistencia entre entornos**
+   - Elimina el problema "funciona en mi maquina"
+   - Mismo comportamiento en desarrollo, testing y produccion
+   - Versiones exactas de Node.js, PostgreSQL y dependencias
+
+2. **Facilidad de despliegue**
+   - Un solo comando (`docker-compose up`) levanta todo el stack
+   - No requiere instalacion manual de PostgreSQL, Node.js ni configuraciones
+   - Ideal para demostraciones y evaluaciones rapidas
+
+3. **Aislamiento de servicios**
+   - Cada servicio (DB, backend, frontend) corre en su propio contenedor
+   - No hay conflictos con otras aplicaciones del sistema
+   - Facil limpieza: `docker-compose down -v` elimina todo
+
+4. **Arquitectura de produccion realista**
+   - Frontend servido por Nginx (servidor web optimizado)
+   - Backend como servicio Node.js independiente
+   - PostgreSQL con volumen persistente
+
+### Arquitectura Docker
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    docker-compose                        │
+├─────────────────┬─────────────────┬─────────────────────┤
+│    postgres     │     backend     │      frontend       │
+│  (PostgreSQL)   │    (NestJS)     │      (Nginx)        │
+│   Puerto 5432   │   Puerto 3001   │     Puerto 80       │
+└─────────────────┴─────────────────┴─────────────────────┘
+```
+
+---
+
+## TypeORM - Modulo y Configuracion
+
+### Por que TypeORM?
+
+1. **Integracion nativa con NestJS**
+   - Modulo oficial `@nestjs/typeorm` facilita configuracion
+   - Inyeccion de dependencias automatica para repositorios
+   - Soporte completo para decoradores TypeScript
+
+2. **Patron Repository**
+   - Abstraccion limpia sobre la base de datos
+   - Metodos CRUD predefinidos (find, save, update, delete)
+   - Facilita testing con mocks
+
+3. **Decoradores declarativos**
+   - Entidades definidas como clases TypeScript
+   - Relaciones claras con `@ManyToOne`, `@OneToMany`, `@OneToOne`
+   - Validaciones a nivel de columna
+
+4. **Funcionalidades avanzadas**
+   - Soft delete con `@DeleteDateColumn`
+   - Timestamps automaticos con `@CreateDateColumn`, `@UpdateDateColumn`
+   - Migraciones para produccion
+
+### Configuracion en el proyecto
+
+```typescript
+// app.module.ts
+TypeOrmModule.forRootAsync({
+  imports: [ConfigModule],
+  useFactory: (configService: ConfigService) => ({
+    type: 'postgres',
+    host: configService.get('database.host'),
+    port: configService.get('database.port'),
+    username: configService.get('database.username'),
+    password: configService.get('database.password'),
+    database: configService.get('database.database'),
+    entities: [__dirname + '/**/*.entity{.ts,.js}'],
+    synchronize: true, // Solo desarrollo, usar migraciones en produccion
+  }),
+  inject: [ConfigService],
+}),
+```
+
+### Uso en modulos
+
+```typescript
+// producto.module.ts
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([Producto, ProductoSucursal]),
+  ],
+  controllers: [ProductoController],
+  providers: [ProductoService],
+})
+export class ProductoModule {}
+```
+
+### Inyeccion en servicios
+
+```typescript
+// producto.service.ts
+@Injectable()
+export class ProductoService {
+  constructor(
+    @InjectRepository(Producto)
+    private productoRepository: Repository<Producto>,
+  ) {}
+
+  async findAll(): Promise<Producto[]> {
+    return this.productoRepository.find();
+  }
+}
+```
 
 ---
 

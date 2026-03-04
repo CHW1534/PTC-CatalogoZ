@@ -710,6 +710,12 @@ button {
 /* ========================================
    PUNTO DE VENTA
 ======================================== */
+
+/* Full width container for POS on desktop */
+.pos-fullwidth {
+  width: 100%;
+}
+
 .punto-venta {
   display: grid;
   grid-template-columns: 1fr 400px;
@@ -3591,6 +3597,161 @@ button {
   }
   .transacciones-table {
     min-width: 0 !important;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE DESIGN - PANTALLAS GRANDES (DESKTOP)
+   ===================================================== */
+
+/* DESKTOP MEDIANO - 1200px y más */
+@media (min-width: 1200px) {
+  :root {
+    --sidebar-width: 400px;
+  }
+
+  .main-content {
+    max-width: 1600px;
+    padding: 1.5rem 2.5rem;
+  }
+
+  /* POS usa todo el ancho disponible */
+  .main-content:has(.pos-fullwidth) {
+    max-width: none;
+    padding: 1.5rem 2rem;
+  }
+
+  .pos-container {
+    gap: 2rem;
+  }
+
+  .pos-productos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.25rem;
+    padding: 1.25rem;
+  }
+
+  .pos-card {
+    min-height: 260px;
+  }
+
+  .pos-card-title {
+    font-size: 0.95rem;
+  }
+
+  .pos-carrito {
+    min-width: 380px;
+  }
+
+  .stats-container.stats-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .sucursales-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* DESKTOP GRANDE - 1400px y más */
+@media (min-width: 1400px) {
+  :root {
+    --sidebar-width: 420px;
+  }
+
+  .main-content {
+    max-width: 1800px;
+    padding: 2rem 3rem;
+  }
+
+  .main-content:has(.pos-fullwidth) {
+    max-width: none;
+    padding: 1.5rem 2.5rem;
+  }
+
+  .pos-productos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .pos-card-body {
+    padding: 1rem;
+  }
+
+  .pos-tallas-section {
+    padding: 0.75rem 1rem;
+  }
+
+  .pos-card-footer {
+    padding: 1rem;
+  }
+
+  .sucursales-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .productos-table th,
+  .productos-table td {
+    padding: 1rem 0.75rem;
+  }
+}
+
+/* DESKTOP MUY GRANDE - 1600px y más */
+@media (min-width: 1600px) {
+  :root {
+    --sidebar-width: 450px;
+  }
+
+  .main-content {
+    max-width: 2000px;
+  }
+
+  .main-content:has(.pos-fullwidth) {
+    padding: 1.5rem 3rem;
+  }
+
+  .pos-productos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+
+  .dashboard-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .stat-card {
+    padding: 1.5rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+}
+
+/* ULTRAWIDE - 1920px y más */
+@media (min-width: 1920px) {
+  :root {
+    --sidebar-width: 480px;
+  }
+
+  .main-content {
+    max-width: 2200px;
+  }
+
+  .main-content:has(.pos-fullwidth) {
+    padding: 1.5rem 4rem;
+  }
+
+  .pos-container {
+    gap: 2.5rem;
+  }
+
+  .pos-productos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.75rem;
+  }
+
+  .pos-carrito-item {
+    padding: 1.25rem;
   }
 }
 

@@ -75,12 +75,12 @@ function MainApp() {
             <InventarioPage />
           </>
         ) : vista === 'ventas' ? (
-          <>
+          <div className="pos-fullwidth">
             <div className="dashboard-header">
               <h2>Punto de Venta</h2>
             </div>
             <PuntoVenta />
-          </>
+          </div>
         ) : (
           <>
             <div className="dashboard-header">

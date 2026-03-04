@@ -15,6 +15,7 @@ Sistema de gestion de productos para tiendas de zapateria y bolsas con soporte m
 - Node.js 18+ 
 - PostgreSQL 14+
 - npm o yarn
+- Docker y Docker Compose (opcional, para demo rapido)
 
 ## Configuración
 
@@ -91,6 +92,37 @@ npm run build
 npm run preview
 ```
 
+### Opcion 3: Docker (Demo Completo)
+
+La forma mas rapida de probar el sistema completo con datos de demostracion:
+
+```bash
+# Levantar todo el stack (PostgreSQL + Backend + Frontend)
+docker-compose up --build
+```
+
+Esto iniciara:
+- **PostgreSQL** en puerto 5432
+- **Backend** en http://localhost:3000
+- **Frontend** en http://localhost:80
+
+**Datos de demostracion incluidos:**
+- 3 sucursales (Centro Historico, Plaza Norte, Galerias Sur)
+- 46 productos variados (zapatos y bolsas)
+- Inventario inicial aleatorio (3-17 unidades por producto)
+- Precios diferenciados por sucursal
+
+Para detener:
+```bash
+docker-compose down
+```
+
+Para reiniciar con datos limpios:
+```bash
+docker-compose down -v  # Elimina volumenes
+docker-compose up --build
+```
+
 ## Uso de la Aplicacion
 
 ### Navegacion Principal
@@ -122,11 +154,14 @@ La aplicacion cuenta con un header de navegacion con las siguientes secciones:
 
 ```
 PTCRETAIL/
+├── docker-compose.yml        # Orquestacion de contenedores
 ├── backend/                  # API NestJS
+│   ├── Dockerfile           # Imagen Docker del backend
 │   ├── src/
 │   │   ├── common/          # Enums y utilidades
-│   │   ├── config/          # Configuración TypeORM
-│   │   └── modules/         # Módulos por dominio
+│   │   ├── config/          # Configuracion TypeORM
+│   │   ├── seed/            # Datos de demostracion
+│   │   └── modules/         # Modulos por dominio
 │   │       ├── sucursal/
 │   │       ├── producto/
 │   │       ├── inventario/
@@ -134,6 +169,8 @@ PTCRETAIL/
 │   └── .env                 # Variables de entorno
 │
 ├── frontend/                 # React + Vite
+│   ├── Dockerfile           # Imagen Docker del frontend
+│   ├── nginx.conf           # Configuracion Nginx
 │   └── src/
 │       ├── components/      # Componentes UI
 │       │   ├── Header.tsx         # Navegacion principal
@@ -145,7 +182,7 @@ PTCRETAIL/
 │       ├── services/        # Llamadas API
 │       └── types/           # Interfaces TypeScript
 │
-├── DESIGN.md                # Documentación técnica
+├── DESIGN.md                # Documentacion tecnica
 └── README.md                # Este archivo
 ```
 

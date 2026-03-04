@@ -8,6 +8,7 @@ import { SucursalModule } from './modules/sucursal/sucursal.module';
 import { ProductoModule } from './modules/producto/producto.module';
 import { InventarioModule } from './modules/inventario/inventario.module';
 import { TransaccionModule } from './modules/transaccion/transaccion.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { TransaccionModule } from './modules/transaccion/transaccion.module';
     ProductoModule,
     InventarioModule,
     TransaccionModule,
+    SeedModule,
   ],
   controllers: [AppController],
   providers: [AppService],

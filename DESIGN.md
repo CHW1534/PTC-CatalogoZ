@@ -13,29 +13,6 @@
 
 ---
 
-## Justificacion de Docker
-
-### Por que Docker?
-
-1. **Consistencia entre entornos**
-   - Elimina el problema "funciona en mi maquina"
-   - Mismo comportamiento en desarrollo, testing y produccion
-   - Versiones exactas de Node.js, PostgreSQL y dependencias
-
-2. **Facilidad de despliegue**
-   - Un solo comando (`docker-compose up`) levanta todo el stack
-   - No requiere instalacion manual de PostgreSQL, Node.js ni configuraciones
-   - Ideal para demostraciones y evaluaciones rapidas
-
-3. **Aislamiento de servicios**
-   - Cada servicio (DB, backend, frontend) corre en su propio contenedor
-   - No hay conflictos con otras aplicaciones del sistema
-   - Facil limpieza: `docker-compose down -v` elimina todo
-
-4. **Arquitectura de produccion realista**
-   - Frontend servido por Nginx (servidor web optimizado)
-   - Backend como servicio Node.js independiente
-   - PostgreSQL con volumen persistente
 
 ### Arquitectura Docker
 
@@ -51,29 +28,6 @@
 
 ---
 
-## TypeORM - Modulo y Configuracion
-
-### Por que TypeORM?
-
-1. **Integracion nativa con NestJS**
-   - Modulo oficial `@nestjs/typeorm` facilita configuracion
-   - Inyeccion de dependencias automatica para repositorios
-   - Soporte completo para decoradores TypeScript
-
-2. **Patron Repository**
-   - Abstraccion limpia sobre la base de datos
-   - Metodos CRUD predefinidos (find, save, update, delete)
-   - Facilita testing con mocks
-
-3. **Decoradores declarativos**
-   - Entidades definidas como clases TypeScript
-   - Relaciones claras con `@ManyToOne`, `@OneToMany`, `@OneToOne`
-   - Validaciones a nivel de columna
-
-4. **Funcionalidades avanzadas**
-   - Soft delete con `@DeleteDateColumn`
-   - Timestamps automaticos con `@CreateDateColumn`, `@UpdateDateColumn`
-   - Migraciones para produccion
 
 ### Configuracion en el proyecto
 
